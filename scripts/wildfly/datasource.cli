@@ -1,0 +1,23 @@
+data-source add \
+--name=LocalHostDS \
+--jndi-name=java:jboss/jdbc/localHostDS \
+--connection-url=jdbc:postgresql://localhost:5432/morgande1 \
+--driver-name=postgres \
+--user-name=morgande1 \
+--password=09126266 \
+--new-connection-sql="set datestyle = ISO, European;"
+
+xa-data-source add \
+--name=LocalHostXADS \
+--driver-name=postgres \
+--jndi-name=java:jboss/jdbc/localHostXADS \
+--user-name=morgande1 \
+--password=09126266 \
+--recovery-username=morgande1 \
+--recovery-password=09126266 \
+--use-ccm=false \
+--max-pool-size=25 \
+--blocking-timeout-wait-millis=5000 \
+--new-connection-sql="set datestyle = ISO, European;" \
+--xa-datasource-properties={"ServerName"=>"localhost","PortNumber"=>5432,"DatabaseName"=>"morgande1"}
+ 

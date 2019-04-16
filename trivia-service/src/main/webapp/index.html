@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Trivia App</title>
+		
+		<!-- JQuery -->
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+		
+		<!-- AngularJS -->
+		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.8/angular.js"></script>
+		
+		<!-- Boostrap -->
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+		
+		<!-- Bootstrap -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+		
+		<!-- Required meta tags -->
+    	<meta charset="utf-8">
+    	<meta name="viewport" content="width=device-width, initial-scale=1">
+    	
+    	<script type="text/javascript" src="trivia-app.js"></script>
+	</head>
+	<body ng-app="triviaApp" ng-controller="authenticationController">
+		<nav class="navbar navbar-inverse navbar-fixed-top">
+			<div class="container">
+				<div class="navbar-header">
+					<button type="button" class="navbar-toggle collapsed"
+						data-toggle="collapse" data-target="#navbar" aria-expanded="false"
+						aria-controls="navbar">
+						<span class="sr-only">Toggle navigation</span> <span
+							class="icon-bar"></span> <span class="icon-bar"></span> <span
+							class="icon-bar"></span>
+					</button>
+					<a class="navbar-brand" href="#">Trivia App</a>
+				</div>
+				<div id="navbar" class="navbar-collapse collapse">
+					<form class="navbar-form navbar-right">
+						<div class="form-group">
+							<input type="text" placeholder="Email" class="form-control" ng-model="email">
+						</div>
+						<div class="form-group">
+							<input type="password" placeholder="Password" class="form-control" ng-model="pwd">
+						</div>
+						<button type="submit" class="btn btn-success" ng-click="login()">Sign in</button>
+					</form>
+				</div>
+				<!--/.navbar-collapse -->
+			</div>
+		</nav>
+		<div class="jumbotron" style="height: 100vh;">
+			<div class="container">
+				<h1>Welcome to the Trivia App</h1>
+				<p>
+					This is a trivia app.  It plays similar to that really famous Trivia game show on TV.  You know the one!
+				<p>
+				<p>
+					It is written 100% in standard Java APIs. That means no external frameworks or libraries.  
+					Check out the source code on GitHub, and find out more about Enterprise Java, now called <a href="https://jakarta.ee/" target="_blank">Jakarta EE</a> and <a href="https://thorntail.io/" target="_blank">Thorntail</a> from RedHat's JBoss Group.  
+				</p>
+        		<p>
+        			<a class="btn btn-primary btn-lg" href="watchLive.html" role="button">Watch Live</a>
+        		</p>
+			</div>
+		</div>
+	</body>
+</html>
