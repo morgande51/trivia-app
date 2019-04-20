@@ -6,7 +6,7 @@ import javax.json.JsonObject;
 import javax.json.JsonString;
 import javax.json.bind.annotation.JsonbTransient;
 
-import com.nge.triviaapp.service.category.domain.Contestant;
+import com.nge.triviaapp.domain.Contestant;
 
 import lombok.Data;
 

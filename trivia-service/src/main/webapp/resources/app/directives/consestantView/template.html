@@ -1,0 +1,23 @@
+<div>
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			<button
+				class="btn btn-sm btn-default pull-right"
+				data-ng-click="vm.remove()">
+				<span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add
+			</button>
+			<form class="form-inline">
+	  			<div class="form-group">
+	    			<label class="sr-only" for="exampleInputEmail3">Filter</label>
+	    			<input type="email" class="form-control" id="exampleInputEmail3" placeholder="Filter...">
+	  			</div>
+	  		</form>
+	  	</div>
+		<div class="panel-body">
+			<ul class="list-inline">
+				<archive-list-option data-ng-repeat="a in vm.archives" archive="a" selectedAction="vm.selectArchive" />
+			</ul>
+		</div>	
+	</div>
+	<archive-view archive="vm.currentArchive" data-ng-hide="vm.currentArchive == undefined"/>
+</div>

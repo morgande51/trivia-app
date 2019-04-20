@@ -17,8 +17,7 @@ import javax.security.enterprise.credential.UsernamePasswordCredential;
 import javax.security.enterprise.identitystore.CredentialValidationResult;
 import javax.security.enterprise.identitystore.IdentityStore;
 
-import com.nge.triviaapp.service.ContestantService;
-import com.nge.triviaapp.service.category.domain.Contestant;
+import com.nge.triviaapp.domain.Contestant;
 
 import lombok.extern.java.Log;
 

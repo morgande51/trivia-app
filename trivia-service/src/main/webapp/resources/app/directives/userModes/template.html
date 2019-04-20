@@ -1,0 +1,7 @@
+<div class="row">
+	<div ng-repeat="mode in vm.modes" ng-class="vm.modes.length === 2 ? 'col-xs-6' : 'col-xs-4'">
+		<h4>Continue as {{mode.name}}</h4>
+		{{mode.info}}
+		<button class="btn btn-block" ng-class="mode.btnType" ng-click="vm.setSelectedMode(mode)">{{mode.btnTxt}}</button>
+	</div>
+</div>
