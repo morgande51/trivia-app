@@ -2,7 +2,7 @@ package com.nge.triviaapp.contestant;
 
 import com.nge.triviaapp.host.AnswerRequest;
 
-public interface BuzzerService {
+public interface ContestantService {
 
 	public void handleAnswerRequest(AnswerRequest request);
 	

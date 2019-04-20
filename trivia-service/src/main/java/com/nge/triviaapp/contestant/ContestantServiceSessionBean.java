@@ -24,7 +24,7 @@ import lombok.extern.java.Log;
 
 @Log
 @Singleton
-public class BuzzerServiceSessionBean implements BuzzerService {
+public class ContestantServiceSessionBean implements ContestantService {
 	
 	private Queue<Contestant> buzzedContestants;
 	private Set<Contestant> previousContestants;

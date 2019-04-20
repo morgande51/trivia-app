@@ -35,9 +35,9 @@ import com.nge.triviaapp.host.HostService;
 import lombok.extern.java.Log;
 
 @Log
-@Path("/buzzer")
+@Path("/contestant")
 @ApplicationScoped
-public class BuzzerEndpoint {
+public class ContestantEndpoint {
 	
 	public static final String BUZZER_REGISTRATION_EVENT = "sse.buzzer.registration";
 	public static final String BUZZER_ACTIVE_CONTESTANT_EVENT = "sse.buzzer.contestant.active";
@@ -51,7 +51,7 @@ public class BuzzerEndpoint {
 	private HostService hostService;
 	
 	@Inject
-	private BuzzerService buzzardService;
+	private ContestantService buzzardService;
 	
 	@Inject
 	@ConverterOf(BuzzerResetRequest.class)
@@ -72,7 +72,7 @@ public class BuzzerEndpoint {
 	}
 	
 	@POST
-	@Path("/register")
+	@Path("/notifications")
 	@Produces(MediaType.SERVER_SENT_EVENTS)
 	public void buzzerRegisration(@Context SseEventSink sinkEvent) {
 		sinkEvent.send(sse.newEvent(BUZZER_REGISTRATION_EVENT));
@@ -97,7 +97,7 @@ public class BuzzerEndpoint {
 	}
 	
 	@GET
-	@Path("/confirm")
+	@Path("/activate")
 	@Consumes(MediaType.WILDCARD)
 	@Produces(MediaType.APPLICATION_JSON)
 	public void confirmAnswer(@Suspended final AsyncResponse response) {
