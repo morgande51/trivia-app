@@ -6,20 +6,20 @@
 (function(triviaApp) {
 	'use strict';
 	
-	// define endpoint
-	var ENDPOINT = 'backend/buzzer';
-	var SSE_ENDOINT = ENDPOINT + '/register';
-	var SELECTION_ENDPOINT = ENDPOINT + '/selection';
-	var QUESTION_CONFIRMATION = ENDPOINT + '/confirm';
+	// define contestant endpoints
+	var ENDPOINT = 'backend/contestant';
+	var NOTIFICATIONS = CONTESTANT_ENDPOINT + '/notifications';
+	var CONTESTANT_ACTIVE = CONTESTANT_ENDPOINT + '/activate';
+	var CONTESTANT_SELECTION = CONTESTANT_ENDPOINT + '/selection';
 	
 	// sse events
-	var BUZZER_ACTIVE_CONTESTANT_EVENT = "sse.buzzer.contestant.active";
-	var BUZZER_CLEAR_EVENT = "sse.buzzer.clear";
+	var BUZZER_ACTIVE_CONTESTANT_EVENT = "sse.contestant.active";
+	var BUZZER_CLEAR_EVENT = "sse.contestant.buzzer.clear";
 	
 	triviaApp.factory('contestantService', ['$http', '$rootScope', function($http, $rootScope) {
 		
 		// register for sse
-		var sse = new EventSource(SSE_ENDPOINT);
+		var sse = new EventSource(NOTIFICATIONS);
 		sse.addEventListener(BUZZER_CLEAR_EVENT, function(event) {
 			$rootScope.$broadcast(BUZZER_CLEAR_EVENT);
 		});
@@ -31,7 +31,7 @@
 		// declare the service
 		var service = {};
 		
-		service.buzzeIn = function() {
+		service.buzzIn = function() {
 			return $http.get(ENDPOINT);
 		};
 		
@@ -40,13 +40,12 @@
 				'categoryId': categoryId,
 				'questionId': questionId
 			};
-			return $http.post(SELECTION_ENDPOINT, payload);
+			return $http.post(CONTESTANT_SELECTION, payload);
 		};
 		
-		service.questionConfirmation = function() {
-			return $http.get(QUESTION_CONFIRMATION);
-		};
-		
+		service.whenSelected = function() {
+			return $http.get(CONTESTANT_ACTIVE);
+		};		
 		
 		return service;
 	}]);
