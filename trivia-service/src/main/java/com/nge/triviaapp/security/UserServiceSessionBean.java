@@ -13,7 +13,7 @@ import com.nge.triviaapp.domain.Contestant;
 
 @Stateless
 @TransactionAttribute(TransactionAttributeType.REQUIRED)
-public class ContestantServiceSessionBean implements ContestantService {
+public class UserServiceSessionBean implements UserService {
 
 	@PersistenceContext
 	private EntityManager em;

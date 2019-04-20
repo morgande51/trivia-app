@@ -7,7 +7,7 @@ import javax.ejb.Local;
 import com.nge.triviaapp.domain.Contestant;
 
 @Local
-public interface ContestantService {
+public interface UserService {
 
 	public Contestant getConstantant(Long contestantId);
 

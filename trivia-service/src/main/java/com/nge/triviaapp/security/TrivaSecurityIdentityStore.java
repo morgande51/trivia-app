@@ -30,7 +30,7 @@ public class TrivaSecurityIdentityStore implements IdentityStore {
 	private Map<String, UserDetails> users;
 	
 	@Inject
-	private ContestantService contestantService;
+	private UserService contestantService;
 	
 	@PostConstruct
 	public void init() {
