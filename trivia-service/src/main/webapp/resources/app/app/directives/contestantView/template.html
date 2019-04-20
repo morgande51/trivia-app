@@ -1,0 +1,31 @@
+<div class="panel panel-default">
+	<div class="panel-heading">
+		Answer the Question by hitting the Buzzer
+  	</div>
+	<div class="panel-body">
+		<button class="btn" ng-class="vm.buzzerStatus" ng-click="vm.buzzIn()" ng-disabled="vm.buzzerActive">Buzzer</button>
+	</div>
+	<div class="panel-footer">
+		<div class="row">
+			<div class="col-xs-7">
+				<select>
+					<option value="none" selected="selected" disabled="disabled">Question...</option>
+					<option value="Question_1">Bad Jokes</option>
+					<option value="Question_2">Cities in Ohio</option>
+					<option value="Question_3">Stuff I hate</option>
+				</select>
+			</div>
+			<div class="col-xs-3">
+				<select>
+					<option value="none" selected="selected" disabled="disabled">Value...</option>
+					<option value="Question_1">$200</option>
+					<option value="Question_2">$300</option>
+					<option value="Question_3">$500</option>
+				</select>
+			</div>
+			<div class="col-xs-2">
+				<button class="btn btn-default">Select</button>
+			</div>
+		</div>
+	</div>
+</div>

@@ -23,6 +23,7 @@
     	<script type="text/javascript" src="resources/app/trivia-app.js"></script>
     	<script type="text/javascript" src="resources/app/services/contestantService.js"></script>
     	<script type="text/javascript" src="resources/app/directives/userModes/directive.js"></script>
+		<script type="text/javascript" src="resources/app/directives/contestantView/directive.js"></script>	
 	</head>
 	<body ng-app="triviaApp" style="padding-top: 70px;"">
 		<nav class="navbar navbar-inverse navbar-fixed-top" ng-controller="authenticationController">
@@ -75,10 +76,10 @@
 		</div>
 		
 		<div class="container" ng-hide="authenticatedUser == null">
-			<user-modes ng-show="selectedMode == null" />
-			<contestant-view ng-show="selectdMode === 'contestant'" />
-			<host-view ng-show="selectdMode === 'host'" />
-			<admin-view ng-show="selectdMode === 'admin'" />
+			<user-modes ng-show="selectedMode == null"></user-modes>
+			<contestant ng-show="selectedMode === 'contestant'"></contestant>
+			<host-view ng-show="selectedMode === 'host'" />
+			<admin-view ng-show="selectedMode === 'admin'" />
 		</div>
 	</body>
 </html>
