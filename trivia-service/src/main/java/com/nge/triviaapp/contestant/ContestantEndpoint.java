@@ -74,6 +74,7 @@ public class ContestantEndpoint {
 	@POST
 	@Path("/notifications")
 	@Produces(MediaType.SERVER_SENT_EVENTS)
+	@Consumes(MediaType.SERVER_SENT_EVENTS)
 	public void buzzerRegisration(@Context SseEventSink sinkEvent) {
 		sinkEvent.send(sse.newEvent(BUZZER_REGISTRATION_EVENT));
 		buzzardBroadcaster.register(sinkEvent);

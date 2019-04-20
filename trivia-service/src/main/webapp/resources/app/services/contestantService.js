@@ -8,9 +8,9 @@
 	
 	// define contestant endpoints
 	var ENDPOINT = 'backend/contestant';
-	var NOTIFICATIONS = CONTESTANT_ENDPOINT + '/notifications';
-	var CONTESTANT_ACTIVE = CONTESTANT_ENDPOINT + '/activate';
-	var CONTESTANT_SELECTION = CONTESTANT_ENDPOINT + '/selection';
+	var NOTIFICATIONS = ENDPOINT + '/notifications';
+	var CONTESTANT_ACTIVE = ENDPOINT + '/activate';
+	var CONTESTANT_SELECTION = ENDPOINT + '/selection';
 	
 	// sse events
 	var BUZZER_ACTIVE_CONTESTANT_EVENT = "sse.contestant.active";

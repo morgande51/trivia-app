@@ -35,6 +35,7 @@ public class HostEndPoint {
 	
 	@POST
 	@Path("/register")
+	@Consumes(MediaType.SERVER_SENT_EVENTS)
 	@Produces(MediaType.SERVER_SENT_EVENTS)
 	public void buzzerRegisration(@Context SseEventSink sinkEvent) {
 		sinkEvent.send(sse.newEvent(HOST_REGISTRATION_EVENT));
