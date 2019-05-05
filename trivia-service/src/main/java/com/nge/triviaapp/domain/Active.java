@@ -1,10 +1,19 @@
 package com.nge.triviaapp.domain;
 
-import javax.enterprise.util.AnnotationLiteral;
+import static java.lang.annotation.ElementType.*;
 
-public interface Active {
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-	public <D> D as();
-	
-	public AnnotationLiteral<ActiveUpdate> getLiteral();
+import javax.inject.Qualifier;
+
+@Retention(RetentionPolicy.RUNTIME)
+@Target({FIELD, METHOD, TYPE, PARAMETER})
+@Qualifier
+public @interface Active {
+
+	Class<? extends ActiveDomain> value();
+
+	ActiveActionType action() default ActiveActionType.UPDATE;
 }

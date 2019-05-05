@@ -9,7 +9,7 @@ public class QuestionSelectionRequest implements Serializable {
 
 	private Long categoryId;
 	
-	private Long questionId;
+	private Integer questionValue;
 	
 	private static final long serialVersionUID = 1L;
 }

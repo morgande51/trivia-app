@@ -1,0 +1,116 @@
+<div>
+	<div class="row">
+		<div class="col-xs-6">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<h3 class="panel-title clear-left" ng-if="vm.activeRound != null">
+						Current Round: {{vm.activeRound.name}}
+					</h3>
+					<h3 class="panel-title" ng-if="vm.activeRound == null">
+						Select Round...
+					</h3>
+				</div>
+				<div class="panel-body" ng-if="vm.activeRound == null">
+					<div class="list-group">
+						<button type="button" class="list-group-item list-group-item-info" ng-repeat="round in vm.rounds" ng-click="vm.setActiveRound(round)">
+							{{round.name}}
+						</button>
+					</div>
+				</div>
+				<div class="panel-footer">
+					<button class="bnt btn-default btn-block" ng-disabled="vm.activeRound == null" ng-click="vm.endActiveRound()">End Round</button>
+				</div>
+			</div>
+		</div>
+		<div class="col-xs-6">
+			<div class="panel" ng-class="{'panel-success': vm.buzzerEvent, 'panel-default': vm.activeContestant == null, 'panel-info': !vm.activeContestant.wrongAnswered && !vm.buzzerEvent, 'panel-warning': vm.activeContestant.wrongAnswered}" ng-if="vm.activeRound != null">
+				<div class="panel-heading">
+					<h3 class="panel-title" ng-if="vm.activeContestant != null && !vm.buzzerEvent">
+						Active Contestant: {{vm.activeContestant.fullName}}
+					</h3>
+					<h3 class="panel-title" ng-if="vm.activeContestant == null">
+						Select Contestant...
+					</h3>
+					<h3 class="panel-title" ng-if="vm.buzzerEvent">
+						Recognized Contestant:
+						<span class="glyphicon glyphicon-question-sign" ng-if="!vm.contestantRecognized && vm.buzzerEvent"></span>
+						<span ng-if="vm.contestantRecognized">{{vm.activeContestant.fullName}}</span>
+					</h3>
+			  	</div>
+			  	<div class="panel-body" ng-if="vm.activeContestant == null">
+					<div class="list-group">
+						<button type="button" class="list-group-item list-group-item-info" ng-repeat="contestant in vm.contestants" ng-click="vm.activateContestant(contestant)">
+							<span class="glyphicon glyphicon-remove-sign" ng-if="contestant.hasAnswered"></span>{{contestant.fullName}}
+						</button>
+					</div>
+				</div>
+				<div class="panel-body" ng-if="vm.activeQuestion != null">
+					<div class="progress" ng-if="vm.contestantRecognized">
+						<uib-progressbar value="vm.activeQuestionTimerValue" type="success">
+							<span class="glyphicon glyphicon-time" aria-hidden="true"></span>
+						</uib-progressbar>
+					</div>
+					<div class="row">
+						<div class="col-xs-4">
+							<button class="btn btn-block btn-success" ng-disabled="!vm.contestantRecognized" ng-click="vm.sendAnswer('CORRECT')">Correct</button>
+						</div>
+						<div class="col-xs-4">
+							<button class="btn btn-block btn-danger" ng-disabled="!vm.contestantRecognized"  ng-click="vm.sendAnswer('INCORRECT')">Wrong!</button>
+						</div>
+						<div class="col-xs-4">
+							<button class="btn btn-block btn-default" ng-disabled="vm.contestantRecognized" ng-click="vm.sendAnswer('NO_ANSWER')">No Answer</button>
+						</div>
+					</div>
+				</div>
+			  	<div class="panel-footer">
+			  		<button class="btn btn-default btn-block" ng-click="vm.recognizeContestant()" ng-disabled="!vm.buzzerEvent">
+			  			<span class="glyphicon glyphicon-exclamation-sign" ng-if="!vm.contestantRecognized && vm.buzzerEvent"></span> Recognize Contestant
+			  		</button>
+			  	</div>
+			</div>
+		</div>
+	</div>
+	<table class="table table-bordered" ng-if="vm.activeRound != null">
+  		<thead>
+  			<tr>
+  				<th ng-repeat="category in vm.activeCategories">
+  					{{category.name}}
+  				</th>
+  			</tr>
+  		</thead>
+  		<tbody>
+  			<tr ng-repeat="value in vm.getQuestionKeys()">
+  				<td ng-repeat="category in vm.activeCategories" ng-class="{'active': category.questions[value].answerType != null, 'info': category.questions[value].answerType == null && category.questions[value].selected}">
+  					<span ng-if="category.questions[value].selected"><b>${{category.questions[value].value}}</b></span>
+  					<span ng-if="!category.questions[value].selected">${{category.questions[value].value}}</span>
+  				</td>
+  			</tr>
+  		</tbody>
+  	</table>
+	<div class="row" ng-if="vm.activeQuestion != null">
+		<div class="col-xs-6">
+			<div class="panel panel-info">
+				<div class="panel-heading">
+					<h3 class="panel-title">The Question Reads...</h3>
+				</div>
+				<div class="panel-body">
+					<h1 class="panel-title">
+						{{vm.activeQuestion.text}}
+					</h1>
+				</div>
+			</div>
+		</div>
+		<div class="col-xs-6">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<h3 class="panel-title">And the Answer is...</h3>
+				</div>
+				<div class="panel-body">
+					<h1 class="panel-title">
+						{{vm.activeQuestion.answer}}
+					</h1>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

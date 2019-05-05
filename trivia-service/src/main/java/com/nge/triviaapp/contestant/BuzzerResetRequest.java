@@ -2,20 +2,20 @@ package com.nge.triviaapp.contestant;
 
 import java.io.Serializable;
 
-import com.nge.triviaapp.host.AnswerType;
+import com.nge.triviaapp.domain.QuestionAnswerType;
 
 import lombok.Getter;
 
 @Getter
 public class BuzzerResetRequest implements Serializable {
 
-	private AnswerType answerType;
+	private QuestionAnswerType answerType;
 	
 	/**
 	 * Constructor
 	 * @param answerType The answerType to set
 	 */
-	public BuzzerResetRequest(AnswerType answerType) {
+	public BuzzerResetRequest(QuestionAnswerType answerType) {
 		super();
 		this.answerType = answerType;
 	}

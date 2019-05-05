@@ -1,7 +1,13 @@
 package com.nge.triviaapp.security;
 
+import static com.nge.triviaapp.security.TriviaSecurity.ADMIN_ROLE;
+import static com.nge.triviaapp.security.TriviaSecurity.CONTESTANT_ROLE;
+import static com.nge.triviaapp.security.TriviaSecurity.HOST_ROLE;
+
 import java.security.Principal;
 
+import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
@@ -10,10 +16,14 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.security.enterprise.SecurityContext;
 
+import lombok.extern.java.Log;
+
 /**
  * Session Bean implementation class PrincipalLocatorService
  */
+@Log
 @Stateless
+@RolesAllowed({CONTESTANT_ROLE, HOST_ROLE, ADMIN_ROLE})
 public class PrincipalLocatorServiceSessionBean implements PrincipalLocatorService {
 
 	@PersistenceContext
@@ -24,6 +34,7 @@ public class PrincipalLocatorServiceSessionBean implements PrincipalLocatorServi
 	
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public <T> T getPrincipalUser(Class<T> principalType) {
+		log.info("########################## Principal Locator Service EJB has a security context!!!");
 		Principal principal = securityContext.getCallerPrincipal();
 //		return em.find(principalType, principal.getName());
 		return em.createNamedQuery("Contestant.findFromEmail", principalType)

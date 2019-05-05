@@ -8,6 +8,7 @@
 		
 		<!-- AngularJS -->
 		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.8/angular.js"></script>
+		<script type="text/javascript" src="resources/lib/angular-bootstrap/2.5.0/ui-bootstrap.js"></script>
 		
 		<!-- Boostrap -->
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
@@ -22,8 +23,12 @@
     	
     	<script type="text/javascript" src="resources/app/trivia-app.js"></script>
     	<script type="text/javascript" src="resources/app/services/contestantService.js"></script>
+    	<script type="text/javascript" src="resources/app/services/gameService.js"></script>
+    	<script type="text/javascript" src="resources/app/services/notificationService.js"></script>
+    	<script type="text/javascript" src="resources/app/services/hostService.js"></script>
     	<script type="text/javascript" src="resources/app/directives/userModes/directive.js"></script>
-		<script type="text/javascript" src="resources/app/directives/contestantView/directive.js"></script>	
+		<script type="text/javascript" src="resources/app/directives/contestantView/directive.js"></script>
+		<script type="text/javascript" src="resources/app/directives/hostView/directive.js"></script>
 	</head>
 	<body ng-app="triviaApp" style="padding-top: 70px;"">
 		<nav class="navbar navbar-inverse navbar-fixed-top" ng-controller="authenticationController">
@@ -76,10 +81,10 @@
 		</div>
 		
 		<div class="container" ng-hide="authenticatedUser == null">
-			<user-modes ng-show="selectedMode == null"></user-modes>
-			<contestant ng-show="selectedMode === 'contestant'"></contestant>
-			<host-view ng-show="selectedMode === 'host'" />
-			<admin-view ng-show="selectedMode === 'admin'" />
+			<user-modes ng-if="selectedMode == null"></user-modes>
+			<contestant-view ng-if="selectedMode === 'contestant'"></contestant-view>
+			<host-view ng-if="selectedMode === 'host'"></host-view>
+			<admin-view ng-if="selectedMode === 'admin'"></admin-view>
 		</div>
 	</body>
 </html>

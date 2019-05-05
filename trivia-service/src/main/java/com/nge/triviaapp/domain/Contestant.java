@@ -4,8 +4,8 @@ import java.io.Serializable;
 import java.security.Principal;
 
 import javax.enterprise.util.AnnotationLiteral;
-import javax.json.bind.annotation.JsonbProperty;
 import javax.json.bind.annotation.JsonbTransient;
+import javax.json.bind.annotation.JsonbVisibility;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -13,6 +13,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.PostLoad;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -24,12 +25,14 @@ import lombok.Setter;
 
 @Entity
 @Table(name="contestant")
-@NamedQueries(
-	@NamedQuery(name="Contestant.findFromEmail", query="select c from Contestant c where c.email = :email")
-)
+@NamedQueries({
+	@NamedQuery(name="Contestant.findFromEmail", query="select c from Contestant c where c.email = :email"),
+	@NamedQuery(name="Contestant.findAll", query="select c from Contestant c")
+})
+@JsonbVisibility(FieldVisibilityStrategy.class)
 @Data
-@EqualsAndHashCode(exclude="totalScore")
-public class Contestant implements Principal, Active, Serializable {
+@EqualsAndHashCode(exclude= {"totalScore", "fullName", "passwordHash"})
+public class Contestant implements Principal, ActiveDomain, Serializable {
 	
 	@Id
 	@SequenceGenerator(name="contestant_seq_gen", sequenceName="contestant_seq")
@@ -45,24 +48,36 @@ public class Contestant implements Principal, Active, Serializable {
 	@Column(name="email")
 	private String email;
 	
-	@Column(name="password")
 	@JsonbTransient
+	@Column(name="password", updatable=false)
 	private String passwordHash;
 	
 	@Transient
 	@Setter(AccessLevel.NONE)
-	@JsonbProperty
 	private int totalScore;
 	
-	public void updateScore(Question question, boolean correctAnswer) {
+	@Transient
+	@Setter(AccessLevel.NONE)
+	private String fullName;
+	
+	@PostLoad
+	public void init() {
+		fullName = firstName + " " + lastName;
+	}
+	
+	public void updateScore(Question question) {
 		int value = question.getValue();
-		if (correctAnswer) {
+		
+		if (question.getAnswerType() == QuestionAnswerType.CORRECT) {
+			question.setAnsweredBy(this);
 			totalScore += value;
 		}
-		else {
+		else if (question.getAnswerType() == QuestionAnswerType.INCORRECT) {
+			question.setAnsweredBy(this);
 			totalScore -= value;
 		}
 	}
+	
 	@Override
 	public String getName() {
 		return email;
@@ -79,14 +94,14 @@ public class Contestant implements Principal, Active, Serializable {
 	}
 	
 	@Override
-	public AnnotationLiteral<ActiveUpdate> getLiteral() {
+	public AnnotationLiteral<Active> getLiteral() {
 		return new ContestantLiternal();
 	}
 	
-	class ContestantLiternal extends AnnotationLiteral<ActiveUpdate> implements ActiveUpdate {
+	class ContestantLiternal extends ActiveActionLiteral {
 		
 		@Override
-		public Class<? extends Active> value() {
+		public Class<? extends ActiveDomain> value() {
 			return Contestant.class;
 		}
 		

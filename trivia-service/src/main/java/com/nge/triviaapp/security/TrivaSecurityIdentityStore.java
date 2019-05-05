@@ -34,20 +34,16 @@ public class TrivaSecurityIdentityStore implements IdentityStore {
 	
 	@PostConstruct
 	public void init() {
-		log.info("CDI init commencing...");
 		InputStream userListStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(USERS_LIST);
 		JsonReader usersReader = Json.createReader(userListStream);
 		JsonObject jsonObj = usersReader.readObject();
 		users = jsonObj.getJsonArray("users").stream()
 				.map(userObj -> new UserDetails(userObj.asJsonObject()))
 				.collect(Collectors.toMap(UserDetails::getUserEmail, u -> u));
-		log.info("CDI init completed. Total users: " + users.size());
 	}
 
 	public CredentialValidationResult validate(UsernamePasswordCredential credentials) {
-		log.info("ContestantService injected: "  + (contestantService != null));
 		UserDetails user = users.get(credentials.getCaller());
-		log.info("User exist: " + (user != null));
 		
 		CredentialValidationResult result;
 		if (user != null && credentials.compareTo(user.getUserEmail(), user.getUserPwd())) {
@@ -57,7 +53,7 @@ public class TrivaSecurityIdentityStore implements IdentityStore {
 				user.setContestant(contestant);
 			}
 			
-			log.info("found user...adding to security context: " + contestant);
+			log.fine("found user...adding to security context: " + contestant);
 			result = new CredentialValidationResult(contestant.getEmail());
         }
 		else {

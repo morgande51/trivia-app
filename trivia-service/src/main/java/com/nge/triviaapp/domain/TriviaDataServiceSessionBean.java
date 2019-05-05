@@ -1,6 +1,6 @@
 package com.nge.triviaapp.domain;
 
-import java.util.Set;
+import java.util.List;
 
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -12,6 +12,13 @@ import javax.persistence.PersistenceContext;
 @TransactionAttribute(TransactionAttributeType.SUPPORTS)
 public class TriviaDataServiceSessionBean implements TriviaDataService {
 	
+	private static final String ROUND_CATEGORY_QUESTIONS_QRY = "Question.findByRoundCategory";
+	private static final String FIND_ALL_ROUNDS_QRY = "Rounds.findAll";
+	private static final String ROUND_CATEGORY_QRY = "Category.findByRound";
+	private static final String FIND_ALL_CONTESTANTS_QRY = "Contestant.findAll";
+	private static final String ROUND_PARAM = "roundId";
+	private static final String CATEGORY_PARAM = "categoryId";
+	
 	@PersistenceContext
 	private EntityManager em;
 	
@@ -19,19 +26,28 @@ public class TriviaDataServiceSessionBean implements TriviaDataService {
 	public Round getRound(Long roundId) {
 		return em.find(Round.class, roundId);
 	}
-
+	
 	@Override
-	public Set<Category> getRoundCategories(Long activeRoundId) {
-		return getRound(activeRoundId).getCategories();
+	public List<Round> getRounds() {
+		return em.createNamedQuery(FIND_ALL_ROUNDS_QRY, Round.class).getResultList();
+	}
+	
+	@Override
+	public List<Category> getRoundCategories(Long roundId) {
+		return em.createNamedQuery(ROUND_CATEGORY_QRY, Category.class).setParameter(ROUND_PARAM, roundId).getResultList();
 	}
 
 	@Override
-	public Set<Question> getRoundCategoryQuestion(Long activeRoundId, Long categoryId) {
-		return getRound(activeRoundId).getCategories().stream()
-				.filter(c -> c.getId().equals(categoryId))
-				.findAny()
-				.get()
-				.getQuestions();
+	public List<Question> getRoundCategoryQuestion(Long roundId, Long categoryId) {
+		return em.createNamedQuery(ROUND_CATEGORY_QUESTIONS_QRY, Question.class)
+				.setParameter(ROUND_PARAM, roundId)
+				.setParameter(CATEGORY_PARAM, categoryId)
+				.getResultList();
+	}
+	
+	@Override
+	public List<Contestant> getContestants() {
+		return em.createNamedQuery(FIND_ALL_CONTESTANTS_QRY, Contestant.class).getResultList();
 	}
 	
 	@Override
@@ -42,5 +58,15 @@ public class TriviaDataServiceSessionBean implements TriviaDataService {
 	@Override
 	public <D> void refresh(D domain) {
 		em.refresh(domain);
+	}
+	
+	@Override
+	public <D> void persist(D domain) {
+		em.persist(domain);
+	}
+	
+	@Override
+	public void flush() {
+		em.flush();
 	}
 }

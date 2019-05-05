@@ -1,6 +1,7 @@
 package com.nge.triviaapp.host;
 
 import com.nge.triviaapp.domain.Contestant;
+import com.nge.triviaapp.domain.QuestionAnswerType;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -16,7 +17,7 @@ public class AcknowlegedAnswerRequest extends AnswerRequest {
 		setAnswerType(request.getAnswerType());
 		setCategoryId(request.getCategoryId());
 		setQuestionId(request.getQuestionId());
-		if (request.getAnswerType() != AnswerType.NO_ANSWER) {
+		if (request.getAnswerType() != QuestionAnswerType.NO_ANSWER) {
 			answeringContestantEmail = answeringContestant.getEmail();
 		}
 	}

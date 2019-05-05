@@ -6,31 +6,44 @@ import java.util.Queue;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.Lock;
-import javax.ejb.LockType;
 import javax.ejb.Singleton;
+import javax.ejb.Startup;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
+import com.nge.triviaapp.contestant.ContestantException.Reason;
+import com.nge.triviaapp.domain.Active;
+import com.nge.triviaapp.domain.ActiveActionType;
 import com.nge.triviaapp.domain.Contestant;
-import com.nge.triviaapp.domain.TriviaSecurity;
+import com.nge.triviaapp.domain.Question;
+import com.nge.triviaapp.domain.QuestionAnswerType;
+import com.nge.triviaapp.domain.Round;
 import com.nge.triviaapp.host.AnswerRequest;
-import com.nge.triviaapp.host.AnswerType;
 import com.nge.triviaapp.security.PrincipalLocatorService;
+import com.nge.triviaapp.security.TriviaSecurity;
 
 import lombok.extern.java.Log;
 
-@Log
 @Singleton
+@Startup
+@RolesAllowed(TriviaSecurity.CONTESTANT_ROLE)
+@Log
 public class ContestantServiceSessionBean implements ContestantService {
 	
+	private boolean activeQuestionExist;
+	
+	private boolean firstContestant;
+	
 	private Queue<Contestant> buzzedContestants;
+	
 	private Set<Contestant> previousContestants;
 	
 	@Inject
-	private Event<Contestant> activeContestantEvent;	// TODO: needs qualifier
+	private Event<BuzzerAcknowledgmentResponse> activeBuzzerEvent;
 	
 	@Inject
 	private Event<BuzzerResetRequest> buzzerResetEvent;
@@ -43,70 +56,113 @@ public class ContestantServiceSessionBean implements ContestantService {
 		log.info("########################...very key, the Buzzer is being init...########################");
 		buzzedContestants = new LinkedList<>();
 		previousContestants = new HashSet<>();
+		activeQuestionExist = false;
+		firstContestant = true;
 	}
 	
-	@Lock(LockType.WRITE)
-	@RolesAllowed(TriviaSecurity.CONTESTANT_ROLE)
-	public BuzzerAcknowledgmentResponse processContestantBuzzard() {
-		// identify the contestant
+	@Lock
+	public BuzzerAcknowledgmentResponse processContestantBuzzard() throws ContestantException {
+ 		// identify the contestant
 		Contestant contestant = principalLocatorService.getPrincipalUser(Contestant.class);
 		log.info("Contestant[" + contestant + "] has attempted to buzz in...");
 		
 		// determine if contestant has buzzed in prior
 		if (previousContestants.contains(contestant)) {
-			String errorMsg = "Contestant " + contestant.getEmail() + " clicked more than once!!";
-			log.severe(errorMsg);
-			throw new RuntimeException(errorMsg);	// TODO: real exception here
+			throw new ContestantException(contestant, Reason.DUPLICATE);
+		}
+		else if (!activeQuestionExist) {
+			throw new ContestantException(contestant, Reason.NO_ACTIVE_QUESTION);
 		}
 		
 		// officially recognize the contestant buzz
 		log.info("Constant[" + contestant + "] buzz is recognized.");
-		boolean isContestantFirst = buzzedContestants.isEmpty();
 		buzzedContestants.add(contestant);
 		
 		// notify host contestant is the first to buzz in
-		if (isContestantFirst) {
-			recognize(contestant);
+		BuzzerAcknowledgmentResponse response;
+		if (firstContestant) {
+			response = recognizeBuzzedContestant();
+			firstContestant = false;
+		}
+		else {
+			response = new BuzzerAcknowledgmentResponse();
 		}
 		
-		return new BuzzerAcknowledgmentResponse(isContestantFirst);
+		return response;
 	}
-
-	@RolesAllowed(TriviaSecurity.ADMIN_ROLE)
+	
+	@PermitAll
+	@Lock
 	public void handleAnswerRequest(@Observes AnswerRequest request) {
-		switch (request.getAnswerType()) {
+		log.info("Contestant Serivce is handling AnswerRequest event: " + request);
+		QuestionAnswerType type = request.getAnswerType();
+		switch (type) {
 			case CORRECT:
 			case NO_ANSWER:
-				resetBuzzer(request.getAnswerType());
+				resetBuzzer(type);
 				break;
-				
+			
 			default:
-				getNextContestant();
+				if (!getNextContestant()) {
+					firstContestant = true;
+				}
 		}
+	}
+	
+	@PermitAll
+	@Lock
+	public void handleRoundEndEvent(@Observes @Active(value=Round.class, action=ActiveActionType.DELETE) Round round) {
+		log.info("Contestant Serivce is handling the end round event");
+		cleanup();
+	}
+	
+	@PermitAll
+	@Lock
+	public void handleRoundUpdateEvent(@Observes @Active(Round.class) Round round) {
+		log.info("Contestant Serivce is handling the round update event");
+		cleanup();
+	}
+	
+	@PermitAll
+	public void handleActiveQuestionEvent(@Observes @Active(Question.class) Question question) {
+		log.info("Contestant Serivce is handling Question Selected event");
+		activeQuestionExist = true;
 	}
 	
 	@RolesAllowed(TriviaSecurity.ADMIN_ROLE)
+	@Lock
 	public void clearBuzzer() {
-		resetBuzzer(AnswerType.NO_ANSWER);
+		resetBuzzer(QuestionAnswerType.NO_ANSWER);
 	}
 	
-	protected void getNextContestant() {
-		Contestant contestant = buzzedContestants.poll();
-		if (contestant != null) {
-			recognize(contestant);
+	protected boolean getNextContestant() {
+		Contestant contestant = buzzedContestants.peek();
+		boolean exist = (contestant != null);
+		if (exist) {
+			recognizeBuzzedContestant();
 		}
+		return exist;	
 	}
 	
-	protected void recognize(Contestant contestant) {
+	protected BuzzerAcknowledgmentResponse recognizeBuzzedContestant() {
+		Contestant contestant = buzzedContestants.poll();
+		BuzzerAcknowledgmentResponse response = new BuzzerAcknowledgmentResponse(contestant);
 		log.info("Recognizeing contestant[" + contestant + "]");
 		previousContestants.add(contestant);
-		activeContestantEvent.fire(contestant);
+		activeBuzzerEvent.fire(response);
+		return response;
 	}
 	
-	protected void resetBuzzer(AnswerType type) {
-		buzzedContestants.clear();
-		previousContestants.clear();
+	protected void resetBuzzer(QuestionAnswerType type) {
 		BuzzerResetRequest request = new BuzzerResetRequest(type);
 		buzzerResetEvent.fire(request);
+		cleanup();
+	}
+	
+	protected final void cleanup() {
+		buzzedContestants.clear();
+		previousContestants.clear();
+		activeQuestionExist = false;
+		firstContestant = true;
 	}
 }

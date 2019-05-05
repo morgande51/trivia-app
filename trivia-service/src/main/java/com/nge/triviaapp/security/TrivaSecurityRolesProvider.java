@@ -29,10 +29,9 @@ public class TrivaSecurityRolesProvider implements IdentityStore {
 	
 	@Override
 	public Set<String> getCallerGroups(CredentialValidationResult validationResult) {
-		log.info("Do we even HIT THIS CODE??????");
 		Principal authenticatedUser = validationResult.getCallerPrincipal();		
 		UserDetails user = idStore.getUserDetails().get(authenticatedUser.getName());
-		log.info("getting roles for user: " + user);
+		log.fine("getting roles for user: " + user);
 		return Stream.of(user.getUserRoles()).collect(Collectors.toSet());
 //		return Stream.of(TriviaSecurity.HOST_ROLE, TriviaSecurity.ADMIN_ROLE, TriviaSecurity.CONTESTANT_ROLE).collect(Collectors.toSet());
 	}

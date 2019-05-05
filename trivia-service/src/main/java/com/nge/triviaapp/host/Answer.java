@@ -8,10 +8,12 @@ import java.lang.annotation.Target;
 
 import javax.inject.Qualifier;
 
+import com.nge.triviaapp.domain.QuestionAnswerType;
+
 @Retention(RetentionPolicy.RUNTIME)
 @Target({FIELD, METHOD, TYPE, PARAMETER})
 @Qualifier
 public @interface Answer {
 
-	AnswerType value();
+	QuestionAnswerType value();
 }

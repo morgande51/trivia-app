@@ -1,6 +1,6 @@
 package com.nge.triviaapp.domain;
 
-import java.util.Set;
+import java.util.List;
 
 import javax.ejb.Local;
 
@@ -9,11 +9,19 @@ public interface TriviaDataService {
 
 	public Round getRound(Long roundId);
 
-	public Set<Category> getRoundCategories(Long activeRoundId);
+	public List<Category> getRoundCategories(Long activeRoundId);
 
-	public Set<Question> getRoundCategoryQuestion(Long activeRoundId, Long categoryId);
+	public List<Question> getRoundCategoryQuestion(Long activeRoundId, Long categoryId);
 	
 	public <D> D merge(D domain);
 	
 	public <D> void refresh(D domain);
+
+	public List<Round> getRounds();
+
+	public List<Contestant> getContestants();
+
+	public <D> void persist(D domain);
+
+	public void flush();
 }

@@ -40,4 +40,22 @@ public class Converters {
 			return builder.toJson(response);
 		};
 	}
+	
+	@ConverterOf(Round.class)
+	@Produces
+	public Function<Round, String> categoryConverterFunction() {
+		return (round) -> {
+			Jsonb builder = JsonbBuilder.create();
+			return builder.toJson(round);
+		};
+	}
+	
+	@ConverterOf(Question.class)
+	@Produces
+	public Function<Question, String> questionConverterFunction() {
+		return (question) -> {
+			Jsonb builder = JsonbBuilder.create();
+			return builder.toJson(question);
+		};
+	}
 }

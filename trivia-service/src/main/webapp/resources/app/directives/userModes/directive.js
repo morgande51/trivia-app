@@ -37,10 +37,9 @@
 		
 		var controller = ['$rootScope', function($rootScope) {
 			var vm = this;
-			
+	
 			function init() {
 				vm.modes = [];
-				
 				$rootScope.$watch('authenticatedUser', function (user) {
 					if (user) {
 						if (user.userRoles.length == 1) {
@@ -62,6 +61,7 @@
 							}
 						}
 					}
+					console.log(vm);
 				});				
 			};
 			init();
@@ -80,6 +80,7 @@
 			restrict: 'E',
 			replace: true,
 			templateUrl: 'resources/app/directives/userModes/template.html',
+			scope: {},
 			controller: controller,
 			controllerAs: 'vm',
 			bindToController: true

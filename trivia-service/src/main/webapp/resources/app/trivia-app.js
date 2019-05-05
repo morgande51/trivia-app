@@ -3,10 +3,15 @@
  */
 (function(angular) {
 	'use strict';
-	var triviaApp = angular.module('triviaApp', []);
-	console.log(triviaApp);
 	
-	triviaApp.factory('authenticationService', ['$http', '$window', function($http, $window) {
+	// add some util stuff
+	String.prototype.capitalize = function() {
+		return this.charAt(0).toUpperCase() + this.slice(1);
+	};
+	
+	var triviaApp = angular.module('triviaApp', ['ui.bootstrap']);
+	
+	triviaApp.factory('authenticationService', ['$http', '$window', '$rootScope', function($http, $window, $rootScope) {
 		// authentication endpoint
 		var AUTHENTICATION_ENDPOINT = 'backend/me';
 		
@@ -18,7 +23,9 @@
 			var auth = $window.btoa(authCred);
 			//console.log(auth);	
 			var headers = {"Authorization": "Basic " + auth};
-			return $http.get(AUTHENTICATION_ENDPOINT, {'headers': headers});
+			var headersAuthentication = {'headers': headers};
+			$rootScope.authentication = headersAuthentication;
+			return $http.get(AUTHENTICATION_ENDPOINT, headersAuthentication);
 		}
 		
 		service.logout = function() {

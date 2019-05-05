@@ -1,4 +1,4 @@
-package com.nge.triviaapp.host;
+package com.nge.triviaapp.game;
 
 import java.io.Serializable;
 

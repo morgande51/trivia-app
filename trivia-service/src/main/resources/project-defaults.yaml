@@ -11,3 +11,5 @@ swarm:
         connection-url: jdbc:postgresql://localhost:5432/morgande1
         user-name: trivia
         password: trivia
+  ejb3:
+    default-security-domain: jaspitest

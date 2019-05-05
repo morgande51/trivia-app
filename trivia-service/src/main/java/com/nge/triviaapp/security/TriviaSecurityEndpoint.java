@@ -1,4 +1,6 @@
-package com.nge.triviaapp.domain;
+package com.nge.triviaapp.security;
+
+import static com.nge.triviaapp.security.TriviaSecurity.*;
 
 import javax.annotation.security.DeclareRoles;
 import javax.annotation.security.RolesAllowed;
@@ -11,11 +13,10 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.nge.triviaapp.security.TrivaSecurityIdentityStore;
-import com.nge.triviaapp.security.UserDetails;
+import com.nge.triviaapp.domain.Contestant;
 
-@BasicAuthenticationMechanismDefinition(realmName="TriviaApp")
-@DeclareRoles({"host", "admin", "contestant"})
+@BasicAuthenticationMechanismDefinition(realmName=DOMAIN)
+@DeclareRoles({CONTESTANT_ROLE, HOST_ROLE, ADMIN_ROLE})
 @Path("/me")
 @ApplicationScoped
 public class TriviaSecurityEndpoint {
@@ -24,14 +25,13 @@ public class TriviaSecurityEndpoint {
 	private TrivaSecurityIdentityStore idProvider;
 	
 	@Inject
-	private SecurityContext securityContext;
+	private PrincipalLocatorService principalService;
 	
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	@RolesAllowed({"host", "admin", "contestant"})
+	@RolesAllowed({CONTESTANT_ROLE, HOST_ROLE, ADMIN_ROLE})
 	public UserDetails login() {
-		String email = securityContext.getCallerPrincipal().getName();
+		String email = principalService.getPrincipalUser(Contestant.class).getEmail();
 		return idProvider.getUserDetails().get(email);
 	}
-	
 }

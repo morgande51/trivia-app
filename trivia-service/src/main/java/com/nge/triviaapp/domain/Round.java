@@ -4,24 +4,34 @@ import java.io.Serializable;
 import java.util.Set;
 
 import javax.enterprise.util.AnnotationLiteral;
+import javax.json.bind.annotation.JsonbTransient;
+import javax.json.bind.annotation.JsonbVisibility;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 @Entity
 @Table(name="round")
+@NamedQueries({
+	@NamedQuery(name="Rounds.findAll", query="select r from Round r")
+})
+@JsonbVisibility(FieldVisibilityStrategy.class)
 @Data
 @EqualsAndHashCode(exclude="categories")
-public class Round implements Active, Serializable {
+@ToString(exclude="categories")
+public class Round implements ActiveDomain, Serializable {
 	
 	@Id
 	@SequenceGenerator(name="round_seq_gen", sequenceName="round_seq")
@@ -32,23 +42,31 @@ public class Round implements Active, Serializable {
 	private String name;
 	
 	@OneToMany(mappedBy="round", cascade=CascadeType.ALL, orphanRemoval=true)
+	@JsonbTransient
 	private Set<Category> categories;
 	
 	@SuppressWarnings("unchecked")
-	@Override
 	public <D> D as() {
 		return (D) this;
 	}
 	
-	@Override
-	public AnnotationLiteral<ActiveUpdate> getLiteral() {
-		return new RoundLiteral();
+	public AnnotationLiteral<Active> getLiteral() {
+		return new RoundLiteral(ActiveActionType.UPDATE);
 	}
 	
-	class RoundLiteral extends AnnotationLiteral<ActiveUpdate> implements ActiveUpdate {
+	public AnnotationLiteral<Active> getLiteral(ActiveActionType type) {
+		return new RoundLiteral(type);
+	}
+	
+	class RoundLiteral extends ActiveActionLiteral {
 		
+		public RoundLiteral(ActiveActionType type) {
+			super(type);
+			// TODO Auto-generated constructor stub
+		}
+
 		@Override
-		public Class<? extends Active> value() {
+		public Class<? extends ActiveDomain> value() {
 			return Round.class;
 		}
 		

@@ -20,7 +20,7 @@
 	var INCORRECT_ANSWER_TYPE = 'INCORRECT';
 	var NO_ANSWER_ANSWER_TYPE = 'NO_ANSWER';
 	
-	triviaApp.directive('contestant', [function() {
+	triviaApp.directive('contestantView', [function() {
 		
 		var controller = ['$rootScope', 'contestantService', function ($rootScope, contestantService) {
 			var vm = this;
