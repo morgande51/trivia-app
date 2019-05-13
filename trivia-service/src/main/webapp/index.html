@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Trivia App</title>
+		
+		<!-- JQuery -->
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+		
+		<!-- AngularJS -->
+		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.8/angular.js"></script>
+		<script type="text/javascript" src="resources/lib/angular-bootstrap/2.5.0/ui-bootstrap.js"></script>
+		
+		<!-- Boostrap -->
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+		
+		<!-- Bootstrap -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+		
+		<!-- Required meta tags -->
+    	<meta charset="utf-8">
+    	<meta name="viewport" content="width=device-width, initial-scale=1">
+    	
+    	<script type="text/javascript" src="resources/app/trivia-app.js"></script>
+    	<script type="text/javascript" src="resources/app/services/contestantService.js"></script>
+    	<script type="text/javascript" src="resources/app/services/gameService.js"></script>
+    	<script type="text/javascript" src="resources/app/services/notificationService.js"></script>
+    	<script type="text/javascript" src="resources/app/services/hostService.js"></script>
+    	<script type="text/javascript" src="resources/app/services/authenticationService.js"></script>
+    	<script type="text/javascript" src="resources/app/directives/userModes/directive.js"></script>
+		<script type="text/javascript" src="resources/app/directives/contestantView/directive.js"></script>
+		<script type="text/javascript" src="resources/app/directives/hostView/directive.js"></script>
+		<script type="text/javascript" src="resources/app/directives/backNavigation/directive.js"></script>
+		<script type="text/javascript" src="resources/app/directives/gameView/directive.js"></script>
+		<script type="text/javascript" src="resources/app/directives/menu/directive.js"></script>
+		<script type="text/javascript" src="resources/app/directives/aboutGame/directive.js"></script>
+	</head>
+	<body ng-app="triviaApp" style="padding-top: 70px;">
+		<menu></menu>
+		
+		<!-- The game goes here -->
+		<about-game ng-if="authenticatedUser == null && selectedMode == null"></about-game>
+		
+		<div class="container" ng-if="authenticatedUser != null">
+			<user-modes ng-if="selectedMode == null"></user-modes>
+			<contestant-view ng-if="selectedMode === 'contestant'"></contestant-view>
+			<host-view ng-if="selectedMode === 'host'"></host-view>
+			<admin-view ng-if="selectedMode === 'admin'"></admin-view>
+		</div>
+		<game-view ng-if="authenticatedUser == null && selectedMode == 'game'"></game-view>
+		</div>
+	</body>
+</html>

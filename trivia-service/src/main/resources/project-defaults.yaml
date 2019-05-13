@@ -1,0 +1,15 @@
+swarm:
+  datasources:
+    jdbc-drivers:
+      org.postgresql:
+        driver-class-name: org.postgresql.Driver
+        xa-datasource-class-name: org.postgresql.xa.PGXADataSource
+        driver-module-name: org.postgresql
+    data-sources:
+      TriviaAppDS:
+        driver-name: org.postgresql
+        connection-url: jdbc:postgresql://localhost:5432/morgande1
+        user-name: trivia
+        password: trivia
+  ejb3:
+    default-security-domain: jaspitest

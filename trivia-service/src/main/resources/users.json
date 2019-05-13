@@ -1,0 +1,32 @@
+{
+	"users": [
+		{
+			"firstName": "Contestent 1",
+			"lastName": "New Contestant",
+			"userEmail": "contestant1@dmnetwork.local",
+			"userPwd": "P@ssword!",
+			"userRoles": ["contestant"]
+		},
+		{
+			"firstName": "Brandi",
+			"lastName": "Robinson",
+			"userEmail": "bnrobin@dmnetwork.local",
+			"userPwd": "Password@123",
+			"userRoles": ["contestant"]
+		},
+		{
+			"firstName": "Darnell",
+			"lastName": "Morgan",
+			"userEmail": "morgande@dmnetwork.local",
+			"userPwd": "Password@123",
+			"userRoles": ["contestant", "admin"]
+		},
+		{
+			"firstName": "Lead ",
+			"lastName": "Host",
+			"userEmail": "host@dmnetwork.local",
+			"userPwd": "P@ssword!",
+			"userRoles": ["host"]
+		}
+	]
+}
