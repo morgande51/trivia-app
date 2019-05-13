@@ -8,13 +8,17 @@
 	
 	// define game endpoints
 	var ENDPOINT = 'backend/game';
+	var ACTIVE = ENDPOINT + "/active";
 	var ROUND = ENDPOINT + '/active/round';
-	var ALL_ROUNDS  = ENDPOINT + '/rounds';
-	var CATEGORIES = ENDPOINT + '/active/round/categories';
-	var CONTESTANTS = ENDPOINT + '/contestants';
 	var CONTESTANT = ENDPOINT + '/active/round/contestant';
+	var CATEGORIES = ENDPOINT + '/active/round/categories';
+	
 	var CATEGORY_ID_PLACEHOLDER = '{categoryId}';
 	var QUESTIONS_FMT = ENDPOINT + '/active/round/categories/{categoryId}/questions';
+
+	var ALL_ROUNDS  = ENDPOINT + '/rounds';
+	var CONTESTANTS = ENDPOINT + '/contestants';
+	
 	
 	triviaApp.factory('gameService', ['$http', '$rootScope', function($http, $rootScope) {
 		
@@ -30,7 +34,7 @@
 			return $http.get(CATEGORIES);
 		};
 		
-		service.getActiveCategoryQuestions = function(categoryId) {
+		service.getActiveRoundCategoryQuestions = function(categoryId) {
 			var url = QUESTIONS_FMT.replace(CATEGORY_ID_PLACEHOLDER, categoryId);
 			console.log('checking authetnication creds...');
 			console.log($rootScope.authentication)
@@ -46,12 +50,12 @@
 			return $http.post(ROUND, payload, $rootScope.authentication);
 		};
 		
-		service.selectionQuestion = function(categoryId, questionId) {
+		service.makeQuestionActive = function(categoryId, questionValue) {
 			var url = QUESTIONS_FMT.replace(CATEGORY_ID_PLACEHOLDER, categoryId);
 			var payload = {
-				'questionId': questionId
+				'questionValue': questionValue
 			};
-			return $http.post(url, payload);
+			return $http.post(url, payload, $rootScope.authentication);
 		};
 		
 		service.endActiveRound = function() {
@@ -64,6 +68,10 @@
 		
 		service.setActiveContestant = function(contestant) {
 			return $http.post(CONTESTANT, contestant, $rootScope.authentication);
+		};
+		
+		service.getActiveGame = function() {
+			return $http.get(ACTIVE);
 		};
 		
 		return service;

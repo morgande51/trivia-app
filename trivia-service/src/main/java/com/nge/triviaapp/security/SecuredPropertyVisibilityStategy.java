@@ -33,11 +33,11 @@ public class SecuredPropertyVisibilityStategy implements PropertyVisibilityStrat
 	protected boolean isVisible(SecuredByRoles rolesAllowed) {
 		boolean visible = true;
 		if (rolesAllowed != null) {
-			log.info("this property requres roles...");
+			log.fine("this property requres roles...");
 			visible = (securityContext != null && 
 					   Stream.of(rolesAllowed.value())
 					   		.anyMatch(r -> securityContext.isCallerInRole(r)));
-			log.info("the visibility for this data will be: " + visible);
+			log.fine("the visibility for this data will be: " + visible);
 		}
 		return visible;
 	}

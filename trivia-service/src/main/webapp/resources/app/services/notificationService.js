@@ -10,7 +10,7 @@
 	var NOTIFICATIONS = 'backend/game/notifications';
 	
 	var BUZZER_ACTIVE_EVENT = 'sse.buzzer.contestant.active';
-	var BUZZER_CLEAR_EVENT = 'sse.contestant.buzzer.clear';
+	var BUZZER_CLEAR_EVENT = 'sse.buzzer.clear';
 	var ROUND_END_EVENT = 'sse.host.round.end';
 	var ACTIVE_ROUND_EVENT = 'sse.host.round.active';
 	var ACTIVE_QUESTION_EVENT = 'sse.contestant.question.active';
@@ -20,8 +20,9 @@
 		// register for sse
 		var sse = new EventSource(NOTIFICATIONS);
 		sse.addEventListener(BUZZER_CLEAR_EVENT, function(event) {
+			var answerPayload = JSON.parse(event.data);
 			$rootScope.$apply(function() {
-				$rootScope.$broadcast(BUZZER_CLEAR_EVENT);
+				$rootScope.$broadcast(BUZZER_CLEAR_EVENT, answerPayload);
 			});
 		});
 		sse.addEventListener(BUZZER_ACTIVE_EVENT, function(event) {
@@ -43,6 +44,10 @@
 		});
 		sse.addEventListener(ACTIVE_QUESTION_EVENT, function (event) {
 			var question = JSON.parse(event.data);
+			console.log('activeQuestion');
+			console.log(question);
+			console.log(question.value);
+			console.log(question.category.name);
 			$rootScope.$apply(function() {
 				$rootScope.$broadcast(ACTIVE_QUESTION_EVENT, question);
 			});

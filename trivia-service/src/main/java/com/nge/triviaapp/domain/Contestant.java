@@ -2,10 +2,13 @@ package com.nge.triviaapp.domain;
 
 import java.io.Serializable;
 import java.security.Principal;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.enterprise.util.AnnotationLiteral;
 import javax.json.bind.annotation.JsonbTransient;
 import javax.json.bind.annotation.JsonbVisibility;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -13,6 +16,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.PostLoad;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -22,6 +26,8 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Setter;
+import lombok.ToString;
+import lombok.extern.java.Log;
 
 @Entity
 @Table(name="contestant")
@@ -31,7 +37,9 @@ import lombok.Setter;
 })
 @JsonbVisibility(FieldVisibilityStrategy.class)
 @Data
-@EqualsAndHashCode(exclude= {"totalScore", "fullName", "passwordHash"})
+@EqualsAndHashCode(exclude= {"totalScore", "fullName", "passwordHash", "scores"})
+@ToString(exclude="scores")
+@Log
 public class Contestant implements Principal, ActiveDomain, Serializable {
 	
 	@Id
@@ -52,6 +60,10 @@ public class Contestant implements Principal, ActiveDomain, Serializable {
 	@Column(name="password", updatable=false)
 	private String passwordHash;
 	
+	@OneToMany(mappedBy="contestant", cascade=CascadeType.ALL, orphanRemoval=true)
+	@JsonbTransient
+	private Set<ContestantScore> scores;
+	
 	@Transient
 	@Setter(AccessLevel.NONE)
 	private int totalScore;
@@ -63,19 +75,47 @@ public class Contestant implements Principal, ActiveDomain, Serializable {
 	@PostLoad
 	public void init() {
 		fullName = firstName + " " + lastName;
+		updateTotalScore();
 	}
 	
 	public void updateScore(Question question) {
 		int value = question.getValue();
+		ContestantScore scoreData = findScoreFor(question);
+	
+		if (scoreData == null) {
+			scoreData = ContestantScore.newInstance(question.getCategory().getRound(), this);
+			if (scores == null) {
+				scores = new HashSet<ContestantScore>();
+			}
+			scores.add(scoreData);
+			log.info("Contestant score: " + scoreData);
+		}
+		int score = scoreData.getScore();
 		
 		if (question.getAnswerType() == QuestionAnswerType.CORRECT) {
 			question.setAnsweredBy(this);
-			totalScore += value;
+			score += value;
 		}
 		else if (question.getAnswerType() == QuestionAnswerType.INCORRECT) {
 			question.setAnsweredBy(this);
-			totalScore -= value;
+			score -= value;
 		}
+		
+		scoreData.setScore(score);
+		updateTotalScore();
+	}
+	
+	protected ContestantScore findScoreFor(Question question) {
+		Round targetRound = question.getCategory().getRound();
+		ContestantScore score = scores.stream()
+				.filter(s -> s.getRound().equals(targetRound) && s.getContestant().equals(this))
+				.findAny()
+				.orElse(null);
+		return score;
+	}
+	
+	protected void updateTotalScore() {
+		totalScore = scores.stream().mapToInt(ContestantScore::getScore).sum();
 	}
 	
 	@Override

@@ -60,7 +60,7 @@ public class TrivaSecurityIdentityStore implements IdentityStore {
 			result = CredentialValidationResult.INVALID_RESULT;
 		}
 		
-		log.info("authentication results status: " + result.getStatus());
+		log.fine("authentication results status: " + result.getStatus());
 		return result;
 	}
 	

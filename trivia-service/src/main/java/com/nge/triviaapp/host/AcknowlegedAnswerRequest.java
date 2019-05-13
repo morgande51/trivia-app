@@ -10,7 +10,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class AcknowlegedAnswerRequest extends AnswerRequest {
 	
-	private String answeringContestantEmail;
+	private Contestant contestant;
 	
 	public AcknowlegedAnswerRequest(AnswerRequest request, Contestant answeringContestant) {
 		super();
@@ -18,7 +18,7 @@ public class AcknowlegedAnswerRequest extends AnswerRequest {
 		setCategoryId(request.getCategoryId());
 		setQuestionId(request.getQuestionId());
 		if (request.getAnswerType() != QuestionAnswerType.NO_ANSWER) {
-			answeringContestantEmail = answeringContestant.getEmail();
+			contestant = answeringContestant;
 		}
 	}
 

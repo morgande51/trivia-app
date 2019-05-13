@@ -9,7 +9,7 @@
 	// define contestant endpoints
 	var ENDPOINT = 'backend/contestant';
 	var BUZZER = ENDPOINT + '/buzzer';
-	var CONTESTANT_ACTIVE = ENDPOINT + '/activate';
+	var CONTESTANT_ACTIVE = 'backend/host/answer';
 	
 	triviaApp.factory('contestantService', ['$http', '$rootScope', function($http, $rootScope) {
 		
@@ -17,10 +17,10 @@
 		var service = {};
 		
 		service.buzzIn = function() {
-			return $http.get(BUZZER);
+			return $http.get(BUZZER, $rootScope.authentication);
 		};
 		
-		service.whenSelected = function() {
+		service.withAnswer = function() {
 			return $http.get(CONTESTANT_ACTIVE);
 		};		
 		

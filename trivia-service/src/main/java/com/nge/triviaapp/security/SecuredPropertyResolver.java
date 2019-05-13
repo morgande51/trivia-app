@@ -5,7 +5,6 @@ import javax.inject.Inject;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
 import javax.json.bind.JsonbConfig;
-import javax.security.enterprise.SecurityContext;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.ext.ContextResolver;
@@ -19,7 +18,7 @@ import lombok.extern.java.Log;
 public class SecuredPropertyResolver implements ContextResolver<Jsonb> {
 		
 	@Inject
-	private SecurityContext securityContext;
+	private JsonbConfig config;
 	
 	@PostConstruct
 	public void init() {
@@ -28,12 +27,10 @@ public class SecuredPropertyResolver implements ContextResolver<Jsonb> {
 	
 	@Override
 	public Jsonb getContext(Class<?> type) {
-		log.info("we are resolving this type: " + type.getName());
+		log.fine("we are resolving this type: " + type.getName());
 		Jsonb builder = null;
 		
 		if (isSecuredType(type)) {
-			SecuredPropertyVisibilityStategy pvs = new SecuredPropertyVisibilityStategy(securityContext);
-			JsonbConfig config = new JsonbConfig().withPropertyVisibilityStrategy(pvs);
 			builder = JsonbBuilder.create(config);
 		}
 		else {

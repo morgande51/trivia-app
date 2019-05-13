@@ -23,7 +23,7 @@
 			</div>
 		</div>
 		<div class="col-xs-6">
-			<div class="panel" ng-class="{'panel-success': vm.buzzerEvent, 'panel-default': vm.activeContestant == null, 'panel-info': !vm.activeContestant.wrongAnswered && !vm.buzzerEvent, 'panel-warning': vm.activeContestant.wrongAnswered}" ng-if="vm.activeRound != null">
+			<div class="panel" ng-class="{'panel-success': vm.buzzerEvent, 'panel-default': vm.activeContestant == null, 'panel-info': !vm.activeContestant.wrongAnswered && !vm.buzzerEvent, 'panel-danger': vm.activeContestant.wrongAnswered}" ng-if="vm.activeRound != null">
 				<div class="panel-heading">
 					<h3 class="panel-title" ng-if="vm.activeContestant != null && !vm.buzzerEvent">
 						Active Contestant: {{vm.activeContestant.fullName}}
@@ -37,14 +37,16 @@
 						<span ng-if="vm.contestantRecognized">{{vm.activeContestant.fullName}}</span>
 					</h3>
 			  	</div>
-			  	<div class="panel-body" ng-if="vm.activeContestant == null">
+			  	<div class="panel-body" ng-if="vm.activeContestant == null && vm.activeQuestion == null">
 					<div class="list-group">
-						<button type="button" class="list-group-item list-group-item-info" ng-repeat="contestant in vm.contestants" ng-click="vm.activateContestant(contestant)">
-							<span class="glyphicon glyphicon-remove-sign" ng-if="contestant.hasAnswered"></span>{{contestant.fullName}}
+						<button type="button" class="list-group-item" ng-repeat="contestant in vm.contestants" ng-click="vm.activateContestant(contestant)" ng-class="contestant.hasAnswered? 'list-group-item-danger' : 'list-group-item-info'">
+							<span class="glyphicon glyphicon-remove-sign" ng-if="contestant.hasAnswered"></span>
+							{{contestant.fullName}}
+							<span class="pull-right badge">{{contestant.totalScore}}</span>
 						</button>
 					</div>
 				</div>
-				<div class="panel-body" ng-if="vm.activeQuestion != null">
+				<div class="panel-body" ng-if="vm.activeContestant != null && vm.activeQuestion != null">
 					<div class="progress" ng-if="vm.contestantRecognized">
 						<uib-progressbar value="vm.activeQuestionTimerValue" type="success">
 							<span class="glyphicon glyphicon-time" aria-hidden="true"></span>

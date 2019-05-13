@@ -116,10 +116,10 @@ public class GameEndPoint {
 	
 	@GET
 	@Path("/active/round")
-	public Round getActiveRound() throws NoActiveRoundException {
+	public Round getActiveRound() throws NoActiveGameException {
 		Round round = gameService.getActiveRound();
 		if (round == null) {
-			throw new NoActiveRoundException();
+			throw new NoActiveGameException();
 		}
 		return round;
 	}
@@ -167,5 +167,15 @@ public class GameEndPoint {
 	@Path("/active/round/contestant")
 	public void setActiveContestant(Contestant contestant) {
 		gameService.setActiveContestant(contestant);
+	}
+	
+	@GET
+	@Path("/active")
+	public ActiveGameStateReponse getGameStatus() throws NoActiveGameException {
+		ActiveGameStateReponse gameState = gameService.getActiveGameState();
+		if (gameState == null) {
+			throw new NoActiveGameException();
+		}
+		return gameState;
 	}
 }

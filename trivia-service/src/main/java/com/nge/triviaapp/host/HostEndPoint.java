@@ -40,7 +40,7 @@ public class HostEndPoint {
 	public void confirmAnswer(@Suspended final AsyncResponse response) {
 		Future<AcknowlegedAnswerRequest> answerFuture = hostService.getHostAnswer();
 		try {
-			AnswerRequest answer = answerFuture.get(CONFIRM_ANSWER_WAIT_TIME, TimeUnit.SECONDS);
+			AcknowlegedAnswerRequest answer = answerFuture.get(CONFIRM_ANSWER_WAIT_TIME, TimeUnit.SECONDS);
 			response.resume(answer);
 		}
 		catch (TimeoutException e) {

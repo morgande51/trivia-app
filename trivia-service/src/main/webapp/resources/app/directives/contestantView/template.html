@@ -1,30 +1,39 @@
-<div class="panel panel-default">
+<div class="panel" ng-class="{'panel-default': vm.contestantStatus == null, 'panel-primary': vm.contestantStatus == 'ACTIVE', 'panel-success': vm.contestantStatus == 'RECOGNIZED', 'panel-warning': vm.contestantStatus == 'PENDING', 'panel-danger': vm.contestantStatus == 'INCORRECT'}">
 	<div class="panel-heading">
-		Answer the Question by hitting the Buzzer
+		<span class="pull-right badge">{{vm.contestant.totalScore}}</span>
+		<h3 class="panel-title" ng-if="vm.activeQuestion != null">
+			Current Question: {{vm.activeQuestion.category.name}} for $ {{vm.activeQuestion.value}}
+  		</h3>
+  		<h3 class="panel-title" ng-if="vm.activeQuestion == null && vm.contestantStatus == 'ACTIVE'">
+  			Select a Question:
+  		</h3>
+  		<h3 class="panel-title" ng-if="vm.activeQuestion == null && vm.contestantStatus == null">
+  			Awaiting Host...
+  		</h3>
   	</div>
 	<div class="panel-body">
-		<button class="btn" ng-class="vm.buzzerStatus" ng-click="vm.buzzIn()" ng-disabled="vm.buzzerActive">Buzzer</button>
+		<div class="center-block">
+			<a href="#" class="btn btn-default" ng-disabled="vm.activeQuestion == null || vm.hasBuzzedIn" ng-click="vm.buzzIn()">
+				<img src="resources/app/images/buzzer.png" class="img-responsive">
+			</a>
+		</div>
 	</div>
-	<div class="panel-footer">
+	<div class="panel-footer" ng-if="vm.activeQuestion == null && vm.contestantStatus == 'ACTIVE'">
 		<div class="row">
 			<div class="col-xs-7">
-				<select>
-					<option value="none" selected="selected" disabled="disabled">Question...</option>
-					<option value="Question_1">Bad Jokes</option>
-					<option value="Question_2">Cities in Ohio</option>
-					<option value="Question_3">Stuff I hate</option>
+				<select class="form-control" ng-model="vm.selectedCategory" ng-options="category.name for category in vm.categories track by category.id">
+					<option value="none" selected="selected" ng-disabled="true">Question...</option>
 				</select>
 			</div>
 			<div class="col-xs-3">
-				<select>
-					<option value="none" selected="selected" disabled="disabled">Value...</option>
-					<option value="Question_1">$200</option>
-					<option value="Question_2">$300</option>
-					<option value="Question_3">$500</option>
+				<select class="form-control" ng-model="vm.selectedQuestionValue" convert-to-number>
+					<option value="none" selected="selected" disabled="true">Value...</option>
+					<option ng-repeat="question in vm.selectedCategory.questions" ng-value="question.value" ng-disabled="question.answerType != null">{{question.value}}</option>
 				</select>
 			</div>
 			<div class="col-xs-2">
-				<button class="btn btn-default">Select</button>
+				{{vm.selectedCategoryId}}
+				<button class="btn btn-default" ng-disabled="vm.selectedQuestionValue == null" ng-click="vm.updateActiveQuestion()">Select Question</button>
 			</div>
 		</div>
 	</div>

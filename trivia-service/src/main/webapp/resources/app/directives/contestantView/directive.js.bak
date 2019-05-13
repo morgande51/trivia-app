@@ -1,0 +1,119 @@
+/**
+ * Define the contestant view
+ * 
+ * Author: Darnell Morgan
+ */
+(function(triviaApp) {
+	'use strict';
+	
+	var CORRECT_ANSWER_TYPE = 'CORRECT';
+	var INCORRECT_ANSWER_TYPE = 'INCORRECT';
+	var NO_ANSWER_ANSWER_TYPE = 'NO_ANSWER';
+	
+	triviaApp.directive('contestantView', [function() {
+		
+		var controller = ['$rootScope', 'contestantService', 'gameService', 'notificationService', function ($rootScope, contestantService, gameService, notificationService) {
+			var vm = this;
+			
+			function init() {
+				_setBuzzerActive(false);
+				_setContestantStatus(null);
+				_setActiveContestantIndicator(false);
+				
+				// handle buzzer clear event
+				$rootScope.$on(notificationService.getBuzzerClearEventType(), function() {
+					_setBuzzerActive(false);
+					_setActiveContestantIndicator(false);
+				});
+				
+				// handle buzzer response
+				$rootScope.$on(notificationService.getBuzzerActiveEventType(), function(activeContestant) {
+					if (_isThisYou(activeContestant)) {
+						_handleHostRecognition();
+					}
+					else {
+						_setBuzzerActive(false);
+						_setActiveContestantIndicator(false);
+					}
+				});
+			}
+			
+			function _setBuzzerActive(active) {
+				vm.buzzerActive = active;
+			}
+			
+			function _setActiveContestantIndicator(indicator) {
+				vm.activeContestant = indicator;
+			}
+			
+			function _setContestantStatus(status) {
+				vm.contestantStatus = status;
+			}
+			
+			function _isThisYou(contestant) {
+				return ($rootScope.authenticatedUser.id === contestant.id);
+			}
+			
+			function _handleHostRecognition() {
+				_setActiveContestantIndicator(true);
+				contestantService.whenSelected().then(function (confirm) {
+					var confirmData = confirm.data;
+					console.log(confirmData);
+					var isUser = _isThisYou(confirmData.contestant);
+					
+					// verify this confirmation matches the authenticated user
+					if (!isUser) {
+						console.log('odd, this contestant doesnt match the host!!!');
+						return;
+					}
+					
+					switch (confirmData.answerType) {
+						case CORRECT_ANSWER_TYPE:
+							break;
+							
+						case INCORRECT_ANSWER_TYPE:
+							break;
+							
+						default:
+					}
+					var correctAnswer = (confirmData.answerType === CORRECT_ANSWER_TYPE);
+					_setAnsweredCorrectly(correctAnswer);
+					_setActiveContestantIndicator(correctAnswer);
+				});
+			}
+			
+			init();
+			
+			vm.buzzIn = function() {
+				if (!vm.buzzerActive) {
+					_setBuzzerActive(true);
+					console.log('btn is locked...now what?');
+					contestantService.buzzIn().then(function (response) {
+						var data = response.data;
+						console.log('we have buzzed in...lets look at payload');
+						console.log(data);
+						if (data.first) {
+							_promptContestant();
+						}
+						else {
+							console.log('your not the first!!!  now what?');
+							_setBuzzerButtonStatus(BUZZER_BTN_WARN);
+						}
+					}, function (error) {
+						console.log('oh noooo!');
+						console.log(error);
+					});
+				}
+			};
+		}];
+		
+		return {
+			restrict: 'E',
+			replace: true,
+			templateUrl: 'resources/app/directives/contestantView/template.html',
+			controller: controller,
+			controllerAs: 'vm',
+			bindToController: true
+		}
+	}]);
+})(angular.module('triviaApp'));

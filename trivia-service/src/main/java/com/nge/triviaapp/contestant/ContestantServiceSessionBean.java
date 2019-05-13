@@ -13,6 +13,7 @@ import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
+import javax.enterprise.event.TransactionPhase;
 import javax.inject.Inject;
 
 import com.nge.triviaapp.contestant.ContestantException.Reason;
@@ -93,7 +94,7 @@ public class ContestantServiceSessionBean implements ContestantService {
 	
 	@PermitAll
 	@Lock
-	public void handleAnswerRequest(@Observes AnswerRequest request) {
+	public void handleAnswerRequest(@Observes(during = TransactionPhase.AFTER_SUCCESS) AnswerRequest request) {
 		log.info("Contestant Serivce is handling AnswerRequest event: " + request);
 		QuestionAnswerType type = request.getAnswerType();
 		switch (type) {

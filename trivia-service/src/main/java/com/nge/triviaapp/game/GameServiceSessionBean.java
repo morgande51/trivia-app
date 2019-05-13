@@ -4,12 +4,14 @@ import java.util.List;
 
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
+import javax.ejb.Asynchronous;
 import javax.ejb.Lock;
 import javax.ejb.Singleton;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
+import javax.enterprise.event.TransactionPhase;
 import javax.enterprise.util.AnnotationLiteral;
 import javax.inject.Inject;
 
@@ -22,7 +24,6 @@ import com.nge.triviaapp.domain.ActiveActionType;
 import com.nge.triviaapp.domain.Category;
 import com.nge.triviaapp.domain.Contestant;
 import com.nge.triviaapp.domain.Question;
-import com.nge.triviaapp.domain.QuestionAnswerType;
 import com.nge.triviaapp.domain.Round;
 import com.nge.triviaapp.domain.TriviaDataService;
 import com.nge.triviaapp.host.AnswerRequest;
@@ -75,10 +76,12 @@ public class GameServiceSessionBean implements GameService {
 			log.severe("Cannot update activeQuestion while its still active: " + contestant);
 			throw new ActiveQuestionException(contestant);
 		}
-		activeQuestion = getActiveRoundCategoryQuestion(request);
-		if (activeQuestion.getAnswerType() != null) {
-			throw new ActiveQuestionException(activeQuestion);
+		
+		Question question = getActiveRoundCategoryQuestion(request);
+		if (question.getAnswerType() != null) {
+			throw new ActiveQuestionException(question);
 		}
+		activeQuestion = question;
 		activeEvent.select(activeQuestion.getLiteral()).fire(activeQuestion);
 		return activeQuestion;
 	}
@@ -121,6 +124,7 @@ public class GameServiceSessionBean implements GameService {
 			literal = contestant.getLiteral();
 		}
 		else {
+			log.warning("be careful here, the activeContestant is going to be set null");
 			literal = activeContestant.getLiteral();
 		}
 		
@@ -132,17 +136,21 @@ public class GameServiceSessionBean implements GameService {
 	
 	@Lock
 	public void handleActiveBuzzerEvent(@Observes BuzzerAcknowledgmentResponse response ) {
+		log.info("host is going to be made aware that the activeContestant will be: " + response.getContestant());
 		setActiveContestant(response.getContestant());
 	}
 	
+	@Asynchronous
 	@Lock
-	public void handleHostAnswerEvent(@Observes AnswerRequest request) {
+	public void handleHostAnswerEvent(@Observes(during=TransactionPhase.IN_PROGRESS)  AnswerRequest request) {
+		log.info("Game service is being notified that the host has ack the answer of: " + activeContestant);
 		switch (request.getAnswerType()) {
 		case CORRECT:
 			this.activeQuestion = null;
 			break;
 			
 		case INCORRECT:
+			log.warning("be careful here, the activeContestant is going to be set null");
 			this.activeContestant = null;
 			break;
 			
@@ -150,6 +158,14 @@ public class GameServiceSessionBean implements GameService {
 			this.activeContestant = null;
 			this.activeQuestion = null;
 		}
+	}
+	
+	public ActiveGameStateReponse getActiveGameState() {
+		ActiveGameStateReponse response = null;
+		if (activeRound != null) {
+			response = new ActiveGameStateReponse(activeRound, activeQuestion, activeContestant);
+		}
+		return response;
 	}
 	
 	protected Question getActiveRoundCategoryQuestion(QuestionSelectionRequest request) {

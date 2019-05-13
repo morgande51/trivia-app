@@ -36,7 +36,7 @@ public class UserServiceSessionBean implements UserService {
 	
 	@PermitAll
 	public Contestant findFromEmail(String email) {
-		return searchForContestantBy(email).findAny().orElse(null);
+		return searchForContestantBy(email.toUpperCase()).findAny().orElse(null);
 	}
 	
 	private Stream<Contestant> searchForContestantBy(String email) {

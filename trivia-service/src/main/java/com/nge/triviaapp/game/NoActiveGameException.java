@@ -2,9 +2,9 @@ package com.nge.triviaapp.game;
 
 import javax.ws.rs.core.Response.Status;
 
-public class NoActiveRoundException extends GameException {
+public class NoActiveGameException extends GameException {
 	
-	public NoActiveRoundException() {
+	public NoActiveGameException() {
 		super("No Active Round Selected");
 		responseStatus = Status.NOT_FOUND;
 	}

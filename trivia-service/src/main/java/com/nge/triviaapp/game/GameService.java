@@ -35,4 +35,6 @@ public interface GameService {
 	public void handleActiveBuzzerEvent(BuzzerAcknowledgmentResponse response);
 
 	public void handleHostAnswerEvent(AnswerRequest request);
+
+	public ActiveGameStateReponse getActiveGameState();
 }

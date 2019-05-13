@@ -1,20 +1,20 @@
 data-source add \
---name=LocalHostDS \
---jndi-name=java:jboss/jdbc/localHostDS \
+--name=TriviaAppDS \
+--jndi-name=java:jboss/datasources/TriviaAppDS \
 --connection-url=jdbc:postgresql://localhost:5432/morgande1 \
 --driver-name=postgres \
---user-name=morgande1 \
---password=09126266 \
+--user-name=trivia \
+--password=trivia \
 --new-connection-sql="set datestyle = ISO, European;"
 
 xa-data-source add \
---name=LocalHostXADS \
+--name=TriviaAppXADS \
 --driver-name=postgres \
---jndi-name=java:jboss/jdbc/localHostXADS \
---user-name=morgande1 \
---password=09126266 \
---recovery-username=morgande1 \
---recovery-password=09126266 \
+--jndi-name=java:jboss/datasources/TriviaAppXADS \
+--user-name=trivia \
+--password=trivia \
+--recovery-username=trivia \
+--recovery-password=trivia \
 --use-ccm=false \
 --max-pool-size=25 \
 --blocking-timeout-wait-millis=5000 \

@@ -6,7 +6,6 @@ import static com.nge.triviaapp.security.TriviaSecurity.HOST_ROLE;
 
 import java.security.Principal;
 
-import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -32,15 +31,27 @@ public class PrincipalLocatorServiceSessionBean implements PrincipalLocatorServi
 	@Inject
 	private SecurityContext securityContext;
 	
-	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
+	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	public <T> T getPrincipalUser(Class<T> principalType) {
-		log.info("########################## Principal Locator Service EJB has a security context!!!");
-		Principal principal = securityContext.getCallerPrincipal();
-//		return em.find(principalType, principal.getName());
-		return em.createNamedQuery("Contestant.findFromEmail", principalType)
+		Principal principal = getPrincipal();
+		
+		T t = null;
+		if (principal != null) {
+			t = em.createNamedQuery("Contestant.findFromEmail", principalType)
 				.setParameter("email", principal.getName())
 				.getResultStream()
 				.findAny()
 				.get();
+			log.fine("located principal: " + t);
+		}
+		return t;
+	}
+	
+	protected Principal getPrincipal() {
+		Principal p = null;
+		if (securityContext != null) {
+			p = securityContext.getCallerPrincipal();
+		}
+		return p;
 	}
 }

@@ -26,65 +26,28 @@
     	<script type="text/javascript" src="resources/app/services/gameService.js"></script>
     	<script type="text/javascript" src="resources/app/services/notificationService.js"></script>
     	<script type="text/javascript" src="resources/app/services/hostService.js"></script>
+    	<script type="text/javascript" src="resources/app/services/authenticationService.js"></script>
     	<script type="text/javascript" src="resources/app/directives/userModes/directive.js"></script>
 		<script type="text/javascript" src="resources/app/directives/contestantView/directive.js"></script>
 		<script type="text/javascript" src="resources/app/directives/hostView/directive.js"></script>
+		<script type="text/javascript" src="resources/app/directives/backNavigation/directive.js"></script>
+		<script type="text/javascript" src="resources/app/directives/gameView/directive.js"></script>
+		<script type="text/javascript" src="resources/app/directives/menu/directive.js"></script>
+		<script type="text/javascript" src="resources/app/directives/aboutGame/directive.js"></script>
 	</head>
-	<body ng-app="triviaApp" style="padding-top: 70px;"">
-		<nav class="navbar navbar-inverse navbar-fixed-top" ng-controller="authenticationController">
-			<div class="container">
-				<div class="navbar-header">
-					<button type="button" class="navbar-toggle collapsed"
-						data-toggle="collapse" data-target="#navbar" aria-expanded="false"
-						aria-controls="navbar">
-						<span class="sr-only">Toggle navigation</span> <span
-							class="icon-bar"></span> <span class="icon-bar"></span> <span
-							class="icon-bar"></span>
-					</button>
-					<a class="navbar-brand" href="#">Trivia App</a>
-				</div>
-				<div id="navbar" class="navbar-collapse collapse">
-					<form class="navbar-form navbar-right" ng-show="authenticatedUser == null">
-						<div class="form-group">
-							<input type="text" placeholder="Email" class="form-control" ng-model="email">
-						</div>
-						<div class="form-group">
-							<input type="password" placeholder="Password" class="form-control" ng-model="pwd">
-						</div>
-						<button type="submit" class="btn btn-success" ng-click="login()">Sign in</button>
-					</form>
-					<div class="pull-right" ng-hide="authenticatedUser == null">
-						<span class="navbar-brand">Welcome {{authenticatedUser.firstName}}</span>
-						<form class="navbar-form navbar-right">
-							<button type="button" class="btn btn-default" ng-click="logout()">Sign Out</button>
-						</form>
-					</div>
-				</div>
-				<!--/.navbar-collapse -->
-			</div>
-		</nav>
+	<body ng-app="triviaApp" style="padding-top: 70px;">
+		<menu></menu>
 		
-		<div class="jumbotron" style="height: 100vh" ng-show="authenticatedUser == null">
-			<div class="container">
-				<h1>Welcome to the Trivia App</h1>
-				<p>
-					This is a trivia app.  It plays similar to that really famous Trivia game show on TV.  You know the one!
-				<p>
-				<p>
-					It is written 100% in standard Java APIs. That means no external frameworks or libraries.  
-					Check out the source code on GitHub, and find out more about Enterprise Java, now called <a href="https://jakarta.ee/" target="_blank">Jakarta EE</a> and <a href="https://thorntail.io/" target="_blank">Thorntail</a> from RedHat's JBoss Group.  
-				</p>
-        		<p>
-        			<a class="btn btn-primary btn-lg" href="watchLive.html" role="button">Watch Live</a>
-        		</p>
-			</div>
-		</div>
+		<!-- The game goes here -->
+		<about-game ng-if="authenticatedUser == null && selectedMode == null"></about-game>
 		
-		<div class="container" ng-hide="authenticatedUser == null">
+		<div class="container" ng-if="authenticatedUser != null">
 			<user-modes ng-if="selectedMode == null"></user-modes>
 			<contestant-view ng-if="selectedMode === 'contestant'"></contestant-view>
 			<host-view ng-if="selectedMode === 'host'"></host-view>
 			<admin-view ng-if="selectedMode === 'admin'"></admin-view>
+		</div>
+		<game-view ng-if="authenticatedUser == null && selectedMode == 'game'"></game-view>
 		</div>
 	</body>
 </html>

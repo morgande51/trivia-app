@@ -118,6 +118,7 @@ public class HostServiceSessionBean implements HostService {
 	
 	@Lock
 	public void onActiveContestantChange(@Observes @Active(Contestant.class) Contestant contestant) {
+		init();
 		this.activeContestant = contestant;
 	}
 	

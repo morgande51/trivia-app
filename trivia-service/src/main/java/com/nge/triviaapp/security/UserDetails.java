@@ -21,7 +21,7 @@ public class UserDetails implements Serializable {
 	public UserDetails(JsonObject userData) {
 		super();
 		contestant = new Contestant();
-		contestant.setEmail(userData.getString("userEmail"));
+		contestant.setEmail(userData.getString("userEmail").toUpperCase());
 		contestant.setPasswordHash(userData.getString("userPwd"));
 		contestant.setFirstName(userData.getString("firstName", "John"));
 		contestant.setLastName(userData.getString("lastName", "Doe"));
