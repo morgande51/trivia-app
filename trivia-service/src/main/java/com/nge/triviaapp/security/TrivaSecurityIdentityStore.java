@@ -13,6 +13,8 @@ import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbBuilder;
 import javax.security.enterprise.credential.UsernamePasswordCredential;
 import javax.security.enterprise.identitystore.CredentialValidationResult;
 import javax.security.enterprise.identitystore.IdentityStore;
@@ -25,35 +27,34 @@ import lombok.extern.java.Log;
 @Log
 public class TrivaSecurityIdentityStore implements IdentityStore {
 	
-	private static final String USERS_LIST = "users.json";
-	
-	private Map<String, UserDetails> users;
+	private static final String USERS_LIST_PROPERTY = "users.json";
+	private static final String CONTESTANT_PROPERTY = "users";
 	
 	@Inject
-	private UserService contestantService;
+	private UserService userService;
 	
 	@PostConstruct
 	public void init() {
-		InputStream userListStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(USERS_LIST);
+		String usersConfig = getUserConfigFile();
+		log.info("Attempting to locate users: " + usersConfig);
+		InputStream userListStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(usersConfig);
 		JsonReader usersReader = Json.createReader(userListStream);
 		JsonObject jsonObj = usersReader.readObject();
-		users = jsonObj.getJsonArray("users").stream()
-				.map(userObj -> new UserDetails(userObj.asJsonObject()))
-				.collect(Collectors.toMap(UserDetails::getUserEmail, u -> u));
+		Set<Contestant> users = jsonObj.getJsonArray(CONTESTANT_PROPERTY)
+			.stream()
+			.map(userObj -> Contestant.createFrom(userObj.asJsonObject()))
+			.collect(Collectors.toSet());
+		userService.addUsers(users);
 	}
 
 	public CredentialValidationResult validate(UsernamePasswordCredential credentials) {
-		UserDetails user = users.get(credentials.getCaller());
+		log.info("target user: " + credentials.getCaller());
+		Contestant contestant =  userService.findFromEmail(credentials.getCaller());
+		log.info("Found the following user: " + contestant);
 		
 		CredentialValidationResult result;
-		if (user != null && credentials.compareTo(user.getUserEmail(), user.getUserPwd())) {
-			Contestant contestant = contestantService.findFromEmail(user.getUserEmail());
-			if (contestant == null) {
-				contestant = contestantService.createFromUserDetails(user);
-				user.setContestant(contestant);
-			}
-			
-			log.fine("found user...adding to security context: " + contestant);
+		if (contestant != null && contestant.validate(credentials.getPasswordAsString())) {
+			log.info("found user...adding to security context: " + contestant);
 			result = new CredentialValidationResult(contestant.getEmail());
         }
 		else {
@@ -69,17 +70,12 @@ public class TrivaSecurityIdentityStore implements IdentityStore {
 		return EnumSet.of(ValidationType.VALIDATE);
 	}
 	
-	protected Set<String> getUserGroups(UserDetails user) {
-//		return Stream.of(user.getUserRoles()).collect(Collectors.toSet());
-		return Stream.of("host", "admin", "contestant").collect(Collectors.toSet());
-	}
-	
 	@Override
 	public int priority() {
 		return 1;
 	}
-	
-	public Map<String, UserDetails> getUserDetails() {
-		return users;
+
+	protected String getUserConfigFile() {
+		return System.getProperty(USERS_LIST_PROPERTY, USERS_LIST_PROPERTY);
 	}
 }

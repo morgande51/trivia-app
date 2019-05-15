@@ -2,7 +2,7 @@ package com.nge.triviaapp.security;
 
 import static com.nge.triviaapp.security.TriviaSecurity.*;
 
-import java.util.Arrays;
+import java.util.Set;
 
 import javax.annotation.security.DeclareRoles;
 import javax.annotation.security.RolesAllowed;
@@ -29,9 +29,6 @@ import com.nge.triviaapp.domain.Contestant;
 public class TriviaSecurityEndpoint {
 	
 	@Inject
-	private TrivaSecurityIdentityStore idProvider;
-	
-	@Inject
 	private PrincipalLocatorService principalService;
 	
 	@GET
@@ -45,12 +42,12 @@ public class TriviaSecurityEndpoint {
 		JsonArray roles = null;
 		Contestant contestant = principalService.getPrincipalUser(Contestant.class);
 		if (contestant != null) {
-			roles = convertRoles(idProvider.getUserDetails().get(contestant.getEmail()).getUserRoles());
+			roles = convertRoles(contestant.getRoles());
 		}
 		return roles;
 	}
 	
-	protected JsonArray convertRoles(String[] roles) {
-		return Json.createArrayBuilder(Arrays.asList(roles)).build();
+	protected JsonArray convertRoles(Set<String> roles) {
+		return Json.createArrayBuilder(roles).build();
 	}
 }

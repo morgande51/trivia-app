@@ -21,13 +21,13 @@ public class UserDetails implements Serializable {
 	public UserDetails(JsonObject userData) {
 		super();
 		contestant = new Contestant();
-		contestant.setEmail(userData.getString("userEmail").toUpperCase());
-		contestant.setPasswordHash(userData.getString("userPwd"));
-		contestant.setFirstName(userData.getString("firstName", "John"));
-		contestant.setLastName(userData.getString("lastName", "Doe"));
-		userRoles = userData.getJsonArray("userRoles").stream()
-				.map(r -> ((JsonString) r).getString())
-				.toArray(i ->  new String[i]);;
+//		contestant.setEmail(userData.getString("userEmail").toUpperCase());
+//		contestant.setPasswordHash(userData.getString("userPwd"));
+//		contestant.setFirstName(userData.getString("firstName", "John"));
+//		contestant.setLastName(userData.getString("lastName", "Doe"));
+//		userRoles = userData.getJsonArray("userRoles").stream()
+//				.map(r -> ((JsonString) r).getString())
+//				.toArray(i ->  new String[i]);;
 	}
 	
 	public String getUserEmail() {

@@ -13,3 +13,7 @@ swarm:
         password: trivia
   ejb3:
     default-security-domain: jaspitest
+  logging:
+    level:
+      org.hibernate.SQL: DEBUG
+      org.hibernate.type.descriptor.sql: TRACE
