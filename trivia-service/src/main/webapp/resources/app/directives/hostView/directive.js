@@ -5,7 +5,9 @@
  */
 (function(triviaApp) {
 	'use strict';
-
+	
+	var APPLICATION_RESET = 'APPLICATION_RESET';
+	
 	triviaApp.directive('hostView', [function() {
 		
 		var controller = ['$rootScope', '$scope', 'gameService', 'notificationService', 'hostService', function ($rootScope, $scope, gameService, notificationService, hostService) {
@@ -21,7 +23,6 @@
 				vm.buzzerEvent = false;
 				vm.contestantRecognized = false;
 				vm.activeQuestion = null;
-				vm.wrongContestants = new Array();
 				
 				gameService.getContestants().then(function (results) {
 					_setContestants(results.data);
@@ -65,9 +66,29 @@
 					_setActiveQuestion(question);
 					_clearContestantsWrongAnswers();
 				});
+				
+				// handle active question clear event
+				$scope.$on(notificationService.getActiveQuestionClearEventType(), function(event) {
+					if (vm.activeQuestion) {
+						vm.activeQuestion.selected = false;
+					}
+					_setActiveQuestion(null);
+					_clearContestantsWrongAnswers();
+					vm.buzzerEvent = false;
+					vm.contestantRecognized = false;
+				});
+				
+				// handle new activeRound
+				$scope.$on(notificationService.getRoundEndEventType(), function (event) {
+					_cleanUp();
+				});
 			}
 			
 			init();
+			$scope.$on(APPLICATION_RESET, function (event) {
+				console.log('we are resetting the application!');
+				init();
+			});
 			
 			function _setAllRounds(rounds) {
 				vm.rounds = rounds;
@@ -172,7 +193,9 @@
 			}
 			
 			function _setActiveQuestion(question) {
-				question.selected = true;
+				if (question) {
+					question.selected = true;
+				}
 				vm.activeQuestion = question;
 				
 				// clear any answered state for contestants
@@ -197,6 +220,18 @@
 					}
 				}
 				return target;
+			}
+			
+			function _cleanUp() {
+				_setActiveRound(null);
+				_setActiveContestant(null);
+				_setActiveQuestion(null);
+				vm.activeCategories = null;
+				vm.buzzerEvent = false;
+				vm.contestantRecognized = false;
+				_questionKeys = new Set();
+				vm.activeQuestionTimerValue = 0;
+				_clearContestantsWrongAnswers();
 			}
 			
 			vm.getQuestionKeys = function() {
@@ -233,9 +268,7 @@
 			
 			vm.endActiveRound = function() {
 				gameService.endActiveRound().then(function() {
-					_setActiveRound(null);
-					_setActiveContestant(null, false);
-					vm.activeCategories = null;
+					_cleanUp();
 				});
 			};
 			

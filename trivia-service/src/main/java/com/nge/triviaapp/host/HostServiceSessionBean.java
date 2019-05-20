@@ -1,12 +1,15 @@
 package com.nge.triviaapp.host;
 
-import java.util.concurrent.Callable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.Future;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
+import javax.ejb.Asynchronous;
 import javax.ejb.Lock;
 import javax.ejb.Singleton;
 import javax.ejb.TransactionAttribute;
@@ -14,11 +17,12 @@ import javax.ejb.TransactionAttributeType;
 import javax.enterprise.concurrent.ManagedExecutorService;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
-import javax.enterprise.event.TransactionPhase;
 import javax.enterprise.inject.Any;
 import javax.inject.Inject;
 
 import com.nge.triviaapp.domain.ActiveDomain;
+import com.nge.triviaapp.contestant.BuzzerReset;
+import com.nge.triviaapp.contestant.BuzzerResetRequest;
 import com.nge.triviaapp.domain.Active;
 import com.nge.triviaapp.domain.ActiveActionType;
 import com.nge.triviaapp.domain.Contestant;
@@ -93,14 +97,19 @@ public class HostServiceSessionBean implements HostService {
 				this.activeContestant = null;
 				this.activeQuestion = null;
 		}
+
 		
+//		final Contestant arcContesant = contestant;
+//		answerRequestCallbacks.forEach(arc -> arc.setRequest(new AcknowlegedAnswerRequest(request, arcContesant)));
 		answerRequestCallback.setRequest(new AcknowlegedAnswerRequest(request, contestant));
 		questionAnsweredEvent.fire(request);
 	}
 	
+	/*
 	public String getActiveQuestionAnswer() {
 		return answerRequestCallback.hasAnswer() ? activeQuestion.getAnswer() : null;
 	}
+	*/
 	
 	@Lock
 	public Future<AcknowlegedAnswerRequest> getHostAnswer() {
@@ -112,32 +121,62 @@ public class HostServiceSessionBean implements HostService {
 	
 	@Lock
 	public void onActiveQuestionChange(@Observes @Active(Question.class) Question question) {
-		init();
+		log.info("Host Service is handling the Action Question");
+		resetFuture(true);
 		this.activeQuestion = question;
 	}
 	
 	@Lock
+	public void onActiveQuestionClear(@Observes @Active(value=Question.class, action=ActiveActionType.DELETE) Question question) {
+		log.info("Host Service is handling the Action Question(DELETE)");
+		resetFuture(false);
+		this.activeQuestion = null;
+	}
+	
+	@Lock
 	public void onActiveContestantChange(@Observes @Active(Contestant.class) Contestant contestant) {
-		init();
+		log.info("Host Service is handling the Action Contestant");
 		this.activeContestant = contestant;
 	}
 	
 	@Lock
 	public void onActiveRoundChange(@Observes @Active(Round.class) Round round) {
-		init();
+		log.info("Host Service is handling the Action Round");
+		resetFuture(false);
 		this.activeQuestion = null;
 	}
 	
 	@Lock
 	public void onActiveRoundEnd(@Observes @Active(value=Round.class, action=ActiveActionType.DELETE) Round round) {
-		init();
+		log.info("Host Service is handling the Action Round(DELETE)");
+		resetFuture(false);
 		this.activeQuestion = null;
 		this.activeContestant = null;
 	}
 	
 	@Lock
+	public void onBuzzerReset(@Observes @BuzzerReset(admin=true) BuzzerResetRequest buzzerReset) {
+		log.info("Host Service is handling the Buzzer Reset Request");
+		resetFuture(false);
+		this.activeContestant = null;
+	}
+	
+	protected void resetFuture(boolean recreate) {
+//		if (futureAnswer != null) {
+//			log.info("The future cancel request is returning: " + futureAnswer.cancel(true));
+//		}
+//		if (recreate) {
+//			answerRequestCallback = new AnswerRequestCallback();
+//			futureAnswer = executorService.submit(answerRequestCallback);
+//		}
+		log.info("the callback is being re-init.  What happens to the future???");
+		answerRequestCallback = new AnswerRequestCallback();
+		futureAnswer = null;
+	}
+	
+	/*
+	@Lock
 	public void onActiveHostAnswer(@Observes(during=TransactionPhase.AFTER_SUCCESS) AnswerRequest request) {
-		/*
 		switch (request.getAnswerType()) {
 			case CORRECT:
 				this.activeQuestion = null;
@@ -151,29 +190,7 @@ public class HostServiceSessionBean implements HostService {
 				this.activeContestant = null;
 				this.activeQuestion = null;
 		}
-		*/
-	}
 	
-	class AnswerRequestCallback implements Callable<AcknowlegedAnswerRequest> {
-		
-		private static final long SLEEP_TIME = 1000 * 5;
-		
-		private AcknowlegedAnswerRequest request;
-		
-		public AcknowlegedAnswerRequest call() throws Exception {
-			while (request == null) {
-				log.fine("No answer ack from host");
-				Thread.sleep(SLEEP_TIME);
-			}
-			return request;
-		}
-		
-		public synchronized void setRequest(AcknowlegedAnswerRequest request) {
-			this.request = request;
-		}
-		
-		public boolean hasAnswer() {
-			return this.request != null;
-		}
 	}
+	 */
 }

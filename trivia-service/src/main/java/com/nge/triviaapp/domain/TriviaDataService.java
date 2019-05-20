@@ -22,6 +22,8 @@ public interface TriviaDataService {
 	public List<Contestant> getContestants();
 
 	public <D> void persist(D domain);
+	
+	public Contestant getContestantByEmail(String email);
 
 	public void flush();
 }

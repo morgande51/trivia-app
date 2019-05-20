@@ -22,7 +22,11 @@
 		
 		service.withAnswer = function() {
 			return $http.get(CONTESTANT_ACTIVE);
-		};		
+		};
+		
+		service.clearBuzzer = function() {
+			return $http.delete(BUZZER, $rootScope.authentication);
+		}
 		
 		return service;
 	}]);

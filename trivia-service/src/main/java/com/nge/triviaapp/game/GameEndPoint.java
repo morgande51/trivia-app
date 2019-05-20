@@ -44,6 +44,7 @@ public class GameEndPoint {
 	public static final String ACTIVE_ROUND_EVENT = "sse.host.round.active";
 	public static final String ROUND_END_EVENT = "sse.host.round.end";
 	public static final String ACTIVE_QUESTION_EVENT = "sse.contestant.question.active";
+	public static final String ACTIVE_QUESTION_CLEAR_EVENT = "sse.contestant.question.clear";
 	
 	@Inject
 	private GameService gameService;
@@ -98,6 +99,11 @@ public class GameEndPoint {
 		buzzardBroadcaster.broadcast(sse.newEvent(ACTIVE_QUESTION_EVENT, questionConverter.apply(question)));
 	}
 	
+	public void handleActiveQuestionClear(@Observes @Active(value=Question.class, action=ActiveActionType.DELETE) Question question) {
+		log.info("Sending broadcase notification[" + ACTIVE_QUESTION_CLEAR_EVENT + "] with: " + question);
+		buzzardBroadcaster.broadcast(sse.newEvent(ACTIVE_QUESTION_CLEAR_EVENT, questionConverter.apply(question)));
+	}
+	
 	public void handleActiveRoundEvent(@Observes @Active(Round.class) Round round) {
 		log.info("Sending broadcast notification[" + ACTIVE_ROUND_EVENT + "] with:" + round);
 		buzzardBroadcaster.broadcast(sse.newEvent(ACTIVE_ROUND_EVENT, roundConverter.apply(round)));
@@ -105,7 +111,7 @@ public class GameEndPoint {
 	
 	public void handleActiveRoundEndEvent(@Observes @Active(value=Round.class, action=ActiveActionType.DELETE) Round round) {
 		log.info("Sending broadcast notification[" + ROUND_END_EVENT + "] with:" + round);
-		buzzardBroadcaster.broadcast(sse.newEvent(ROUND_END_EVENT));
+		buzzardBroadcaster.broadcast(sse.newEvent(ROUND_END_EVENT, "NO_DATA"));
 	}
 	
 	@GET
@@ -155,6 +161,12 @@ public class GameEndPoint {
 		request.setCategoryId(categoryId);
 		Question question = gameService.makeQuestionActive(request);
 		return question;
+	}
+	
+	@DELETE
+	@Path("/active/round/question")
+	public void cleaActiveQuestion() {
+		gameService.clearActiveQuestion();
 	}
 	
 	@GET

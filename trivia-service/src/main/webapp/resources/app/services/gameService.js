@@ -12,6 +12,7 @@
 	var ROUND = ENDPOINT + '/active/round';
 	var CONTESTANT = ENDPOINT + '/active/round/contestant';
 	var CATEGORIES = ENDPOINT + '/active/round/categories';
+	var QUESTION = ENDPOINT + '/active/round/question';
 	
 	var CATEGORY_ID_PLACEHOLDER = '{categoryId}';
 	var QUESTIONS_FMT = ENDPOINT + '/active/round/categories/{categoryId}/questions';
@@ -56,6 +57,11 @@
 				'questionValue': questionValue
 			};
 			return $http.post(url, payload, $rootScope.authentication);
+		};
+		
+		service.clearActiveQuestion = function() {
+			var url = QUESTION;
+			return $http.delete(url, $rootScope.authentication);
 		};
 		
 		service.endActiveRound = function() {

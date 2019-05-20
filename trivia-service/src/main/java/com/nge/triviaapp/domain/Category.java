@@ -2,7 +2,9 @@ package com.nge.triviaapp.domain;
 
 import java.io.Serializable;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import javax.json.JsonObject;
 import javax.json.bind.annotation.JsonbTransient;
 import javax.json.bind.annotation.JsonbVisibility;
 import javax.persistence.CascadeType;
@@ -50,6 +52,15 @@ public class Category implements Serializable {
 	@OneToMany(mappedBy="category", cascade=CascadeType.ALL, orphanRemoval=true)
 	@JsonbTransient
 	private Set<Question> questions;
+	
+	public static Category createFrom(JsonObject jsonObj, Round round) {
+		Category category = new Category();
+		category.setRound(round);
+		category.setName(jsonObj.getString("categoryName"));
+		Set<Question> questions = jsonObj.getJsonArray("questions").stream().map(q -> Question.createFrom(q.asJsonObject(), category)).collect(Collectors.toSet());
+		category.setQuestions(questions);
+		return category;
+	}
 	
 	private static final long serialVersionUID = 1L;
 }

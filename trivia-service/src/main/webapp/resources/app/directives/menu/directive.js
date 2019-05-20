@@ -6,6 +6,8 @@
 (function(triviaApp) {
 	'use strict';
 	
+	var APPLICATION_RESET = 'APPLICATION_RESET';
+	
 	triviaApp.directive('menu', [function() {
 		
 		var controller = ['authenticationService', '$rootScope', function(authenticationService, $rootScope) {
@@ -37,6 +39,10 @@
 				}, function(errorObj) {
 					console.log(errorObj);
 				});
+			};
+			
+			vm.reset = function() {
+				$rootScope.$broadcast(APPLICATION_RESET);
 			};
 		}];
 		

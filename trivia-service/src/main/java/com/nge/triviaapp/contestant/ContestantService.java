@@ -17,4 +17,6 @@ public interface ContestantService {
 	public void handleRoundUpdateEvent(Round round);
 
 	public void handleActiveQuestionEvent(Question question);
+
+	public void handleActiveClearEvent(Question question);
 }

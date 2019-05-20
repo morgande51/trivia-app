@@ -1,0 +1,34 @@
+<div>	
+	<div class="row">
+		<div class="col-xs-4">
+			<div class="panel" ng-class="vm.activeRound ? 'panel-primary' : 'panel-default'">
+				<div class="panel-heading">
+					<h3 class="panel-title">Active Round: {{vm.activeRound.name}}</h3>
+				</div>
+				<div class="panel-footer">
+					<button class="btn btn-default btn-block" ng-disabled="vm.activeRound == null" ng-click="vm.endRound()">End Round</button>
+				</div>
+			</div>
+		</div>
+		<div class="col-xs-4">
+			<div class="panel" ng-class="vm.activeQuestion ? 'panel-primary' : 'panel-default'">
+				<div class="panel-heading">
+					<h3 class="panel-title">Active Question: <span ng-if="vm.activeQuestion">{{vm.activeQuestion.category.name}} for $ {{vm.activeQuestion.value}}</span></h3>
+				</div>
+				<div class="panel-footer">
+					<button class="btn btn-default btn-block" ng-disabled="vm.activeQuestion == null" ng-click="vm.clearActiveQuestion()">Clear Active Question</button>
+				</div>
+			</div>
+		</div>
+		<div class="col-xs-4">
+			<div class="panel" ng-class="vm.activeContestant ? 'panel-primary' : 'panel-default'">
+				<div class="panel-heading">
+					<h3 class="panel-title">Active Contestant: {{vm.activeContestant.fullName}}</h3>
+				</div>
+				<div class="panel-footer">
+					<button class="btn btn-default btn-block" ng-disabled="vm.activeContestant == null" ng-click="vm.clearBuzzer()">Clear Buzzer</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

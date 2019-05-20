@@ -31,7 +31,7 @@ import lombok.extern.java.Log;
 
 @Singleton
 @Startup
-@RolesAllowed(TriviaSecurity.CONTESTANT_ROLE)
+@PermitAll
 @Log
 public class ContestantServiceSessionBean implements ContestantService {
 	
@@ -61,11 +61,12 @@ public class ContestantServiceSessionBean implements ContestantService {
 		firstContestant = true;
 	}
 	
+	@RolesAllowed(TriviaSecurity.CONTESTANT_ROLE)
 	@Lock
 	public BuzzerAcknowledgmentResponse processContestantBuzzard() throws ContestantException {
  		// identify the contestant
 		Contestant contestant = principalLocatorService.getPrincipalUser(Contestant.class);
-		log.info("Contestant[" + contestant + "] has attempted to buzz in...");
+		log.info("Contestant[" + contestant.getEmail() + "] has attempted to buzz in...");
 		
 		// determine if contestant has buzzed in prior
 		if (previousContestants.contains(contestant)) {
@@ -76,7 +77,7 @@ public class ContestantServiceSessionBean implements ContestantService {
 		}
 		
 		// officially recognize the contestant buzz
-		log.info("Constant[" + contestant + "] buzz is recognized.");
+		log.fine("Constant[" + contestant.getEmail() + "] buzz is recognized.");
 		buzzedContestants.add(contestant);
 		
 		// notify host contestant is the first to buzz in
@@ -92,7 +93,6 @@ public class ContestantServiceSessionBean implements ContestantService {
 		return response;
 	}
 	
-	@PermitAll
 	@Lock
 	public void handleAnswerRequest(@Observes(during = TransactionPhase.AFTER_SUCCESS) AnswerRequest request) {
 		log.info("Contestant Serivce is handling AnswerRequest event: " + request);
@@ -100,7 +100,7 @@ public class ContestantServiceSessionBean implements ContestantService {
 		switch (type) {
 			case CORRECT:
 			case NO_ANSWER:
-				resetBuzzer(type);
+				resetBuzzer(new BuzzerResetRequest(type));
 				break;
 			
 			default:
@@ -110,30 +110,34 @@ public class ContestantServiceSessionBean implements ContestantService {
 		}
 	}
 	
-	@PermitAll
 	@Lock
 	public void handleRoundEndEvent(@Observes @Active(value=Round.class, action=ActiveActionType.DELETE) Round round) {
 		log.info("Contestant Serivce is handling the end round event");
 		cleanup();
 	}
 	
-	@PermitAll
 	@Lock
 	public void handleRoundUpdateEvent(@Observes @Active(Round.class) Round round) {
 		log.info("Contestant Serivce is handling the round update event");
 		cleanup();
 	}
 	
-	@PermitAll
+	@Lock
 	public void handleActiveQuestionEvent(@Observes @Active(Question.class) Question question) {
 		log.info("Contestant Serivce is handling Question Selected event");
 		activeQuestionExist = true;
 	}
 	
+	@Lock
+	public void handleActiveClearEvent(@Observes @Active(value=Question.class, action=ActiveActionType.DELETE) Question question) {
+		log.info("Contestant Serivce is handling Question Clear event");
+		cleanup();
+	}
+	
 	@RolesAllowed(TriviaSecurity.ADMIN_ROLE)
 	@Lock
 	public void clearBuzzer() {
-		resetBuzzer(QuestionAnswerType.NO_ANSWER);
+		resetBuzzer(new BuzzerResetRequest());
 	}
 	
 	protected boolean getNextContestant() {
@@ -148,15 +152,14 @@ public class ContestantServiceSessionBean implements ContestantService {
 	protected BuzzerAcknowledgmentResponse recognizeBuzzedContestant() {
 		Contestant contestant = buzzedContestants.poll();
 		BuzzerAcknowledgmentResponse response = new BuzzerAcknowledgmentResponse(contestant);
-		log.info("Recognizeing contestant[" + contestant + "]");
+		log.info("Recognized contestant[" + contestant.getEmail() + "]");
 		previousContestants.add(contestant);
 		activeBuzzerEvent.fire(response);
 		return response;
 	}
 	
-	protected void resetBuzzer(QuestionAnswerType type) {
-		BuzzerResetRequest request = new BuzzerResetRequest(type);
-		buzzerResetEvent.fire(request);
+	protected void resetBuzzer(BuzzerResetRequest request) {
+		buzzerResetEvent.select(request.getLiteral()).fire(request);
 		cleanup();
 	}
 	

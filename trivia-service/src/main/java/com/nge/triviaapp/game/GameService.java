@@ -5,6 +5,7 @@ import java.util.List;
 import javax.ejb.Local;
 
 import com.nge.triviaapp.contestant.BuzzerAcknowledgmentResponse;
+import com.nge.triviaapp.contestant.BuzzerResetRequest;
 import com.nge.triviaapp.domain.Category;
 import com.nge.triviaapp.domain.Contestant;
 import com.nge.triviaapp.domain.Question;
@@ -37,4 +38,8 @@ public interface GameService {
 	public void handleHostAnswerEvent(AnswerRequest request);
 
 	public ActiveGameStateReponse getActiveGameState();
+
+	public void clearActiveQuestion();
+
+	public void handleBuzzerClearEvent(BuzzerResetRequest buzzerReset);
 }

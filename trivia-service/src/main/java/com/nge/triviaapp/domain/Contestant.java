@@ -37,7 +37,6 @@ import javax.persistence.Transient;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.java.Log;
@@ -45,13 +44,13 @@ import lombok.extern.java.Log;
 @Entity
 @Table(name="contestant", indexes=@Index(unique=true, columnList="email"))
 @NamedQueries({
-	@NamedQuery(name="Contestant.findFromEmail", query="select c from Contestant c left join fetch c.roles left join fetch c.scores where c.email like :email"),
-	@NamedQuery(name="Contestant.findAll", query="select c from Contestant c join fetch c.scores")
+	@NamedQuery(name="Contestant.findByEmail", query="select c from Contestant c left join fetch c.contestantRoles left join fetch c.scores where c.email like :email"),
+	@NamedQuery(name="Contestant.findAll", query="select c from Contestant c left join fetch c.scores")
 })
 @JsonbVisibility(FieldVisibilityStrategy.class)
 @Data
-@EqualsAndHashCode(exclude= {"totalScore", "fullName", "passwordHash", "salt", "scores", "roles"})
-@ToString(exclude= {"scores", "roles"})
+@EqualsAndHashCode(exclude= {"totalScore", "fullName", "passwordHash", "salt", "scores", "contestantRoles"})
+@ToString(exclude= {"scores", "contestantRoles"})
 @Log
 public class Contestant implements Principal, ActiveDomain, Serializable {
 	
@@ -90,9 +89,8 @@ public class Contestant implements Principal, ActiveDomain, Serializable {
 	private Set<ContestantScore> scores;
 	
 	@JsonbTransient
-	@Getter(AccessLevel.NONE)
 	@OneToMany(mappedBy="contestant", cascade=CascadeType.ALL, orphanRemoval=true)
-	private Set<ContestantRole> roles;
+	private Set<ContestantRole> contestantRoles;
 	
 	@Transient
 	@Setter(AccessLevel.NONE)
@@ -127,7 +125,7 @@ public class Contestant implements Principal, ActiveDomain, Serializable {
 			score += value;
 		}
 		else if (question.getAnswerType() == QuestionAnswerType.INCORRECT) {
-			question.setAnsweredBy(this);
+//			question.setAnsweredBy(this);
 			score -= value;
 		}
 		
@@ -165,7 +163,7 @@ public class Contestant implements Principal, ActiveDomain, Serializable {
 	}
 	
 	public Set<String> getRoles() {
-		return roles.stream()
+		return contestantRoles.stream()
 				.map(ContestantRole::getRoleName)
 				.collect(Collectors.toSet());
 	}
@@ -188,7 +186,6 @@ public class Contestant implements Principal, ActiveDomain, Serializable {
 		try {
 			byte[] pwd = encryptePwd(decode(salt), password);
 			match = Arrays.equals(pwd, decode(passwordHash));
-			System.out.println("pwd match: " + match);
 		}
 		catch (Exception e) {
 			throw new RuntimeException(e);
@@ -217,22 +214,16 @@ public class Contestant implements Principal, ActiveDomain, Serializable {
 		return Base64.getDecoder().decode(str);
 	}
 	
-	/*
-	public static <T extends Principal> Contestant as(T user) {
-		return (Contestant) user;
-	}
-	*/
-	
 	public static Contestant createFrom(JsonObject userData) {
 		Contestant contestant = new Contestant();
 		contestant.setEmail(userData.getString("userEmail").toUpperCase());
 		contestant.savePassword(userData.getString("userPwd"));
 		contestant.setFirstName(userData.getString("firstName", "John"));
 		contestant.setLastName(userData.getString("lastName", "Doe"));
-		contestant.setRoles(userData.getJsonArray("userRoles")
-									.stream()
-									.map(r -> ContestantRole.createFrom((JsonString) r, contestant))
-									.collect(Collectors.toSet()));
+		contestant.setContestantRoles(userData.getJsonArray("userRoles")
+				.stream()
+				.map(r -> ContestantRole.createFrom((JsonString) r, contestant))
+				.collect(Collectors.toSet()));
 		return contestant;
 	}
 	

@@ -1,0 +1,134 @@
+{
+	"rounds": [
+		{
+			"round": 1,
+			"roundName": "Round 1",
+			"categories": [
+				{
+					"category": 1,
+					"categoryName": "Characters",
+					"questions": [
+						{
+							"question": "Sandor Clegane",
+							"answer": "The Hound",
+							"value": 100
+						},
+						{
+							"question": "He knighted Brine",
+							"answer": "Sir Jaime Lannister",
+							"value": 200
+						},
+						{
+							"question": "Jon Snow’s Wilding girlfriend",
+							"answer": "Ygritte",
+							"value": 300
+						},
+						{
+							"question": "The Red Viper of Dorne",
+							"answer": "Oberyn Martell",
+							"value": 400
+						},
+						{
+							"question": "A leiutentant in the Second Sons and Dany’s lover",
+							"answer": "Daario Naharis",
+							"value": 500
+						}
+					]
+				},
+				{
+					"category": 2,
+					"categoryName": "Who said that? (RHoATL voice)",
+					"questions": [
+						{
+							"question": "What do dragons eat, anyway?",
+							"answer": "Sansa Stark",
+							"value": 100
+						},
+						{
+							"question": "You want a whore? Buy her. You want a queen? Earn her.",
+							"answer": "Cersei Lannister",
+							"value": 200
+						},
+						{
+							"question": "You gave up your crown to save your people. Would she do the same?",
+							"answer": "Sawmell Tarly",
+							"value": 300
+						},
+						{
+							"question": "I always knew you were just another rich girl.",
+							"answer": "Gendry",
+							"value": 400
+						},
+						{
+							"question": "Distrusting me was the wisest thing you’ve done since climbing down from your horse",
+							"answer": "Petyr Baelish or Little Finger",
+							"value": 500
+						}
+					]
+				},
+				{
+					"category": 3,
+					"categoryName": "Places",
+					"questions": [
+						{
+							"question": "City where the Iron Throne sits",
+							"answer": "King’s Landing",
+							"value": 100
+						},
+						{
+							"question": "Cersei claimed this place had never fallen",
+							"answer": "The Red Keep",
+							"value": 200
+						},
+						{
+							"question": "Ruled by House Martell",
+							"answer": "Dorne",
+							"value": 300
+						},
+						{
+							"question": "Home of Olenna Tyrell",
+							"answer": "Highgarden",
+							"value": 400
+						},
+						{
+							"question": "Ancient castel with the Moon Door and seat of House Arryn",
+							"answer": "The Eyrie",
+							"value": 500
+						}
+					]
+				},
+				{
+					"category": 4,
+					"categoryName": "Who killed me?",
+					"questions": [
+						{
+							"question": "Euron Greyjoy",
+							"answer": "Jaime Lannister",
+							"value": 100
+						},
+						{
+							"question": "Lord Varys",
+							"answer": "Drogon",
+							"value": 200
+						},
+						{
+							"question": "Shae",
+							"answer": "Tyrion Lannister",
+							"value": 300
+						},
+						{
+							"question": "Lyanna Mormont",
+							"answer": "Undead giant",
+							"value": 400
+						},
+						{
+							"question": "Tommen Baratheon",
+							"answer": "Himself/Suicide",
+							"value": 500
+						}
+					]  
+				}
+			]
+		}
+	]
+}

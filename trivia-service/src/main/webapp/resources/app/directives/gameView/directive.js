@@ -12,7 +12,7 @@
 	
 	triviaApp.directive('gameView', [function() {
 		
-		var controller = ['$rootScope', '$scope', 'gameService', 'notificationService', function ($rootScope, $scope, gameService, notificationService) {
+		var controller = ['$rootScope', '$scope', 'gameService', 'notificationService', 'contestantService', function ($rootScope, $scope, gameService, notificationService, contestantService) {
 			var vm = this;
 			
 			var _questionKeys;
@@ -34,12 +34,15 @@
 						_setActiveContestant(activeContestant);
 					}, function(error) {
 						console.log('No active game');
-					})
+					});
 				});
 				
 				// handle active contestant event
 				$scope.$on(notificationService.getBuzzerActiveEventType(), function(event, activeContestant) {
-					_setActiveContestant(activeContestant, true);
+					if (vm.activeQuestion) {
+						_setActiveContestant(activeContestant, true);
+						_handleHostResponse();
+					}
 				});
 				
 				// handle active question event
@@ -51,11 +54,28 @@
 				
 				// handle buzzer clear notification
 				$scope.$on(notificationService.getBuzzerClearEventType(), function(event, answerPayload) {
-					if (vm.activeContestant && vm.buzzerEvent) {
-						vm.activeContestant.answerType = answerPayload.answerType;
+					if (vm.waitingForHost) {
+						var clearWatcher;
+						console.log('...attempting to wait for the host to finish before we perform buzzer clear...');
+						clearWatcher = $scope.$watch('vm.waitingForHost', function(waitingForHost) {
+							if (!waitingForHost) {	
+								_setActiveQuestion(null);
+								vm.buzzerEvent = false;
+								clearWatcher();
+							}
+						});
 					}
+					else if (vm.activeQuestion) {
+						vm.activeQuestion.selected = false;
+						vm.activeQuestion.answerType = answerPayload;
+						_setActiveQuestion(null);
+						vm.buzzerEvent = false;
+					}
+				});
+				
+				// handle question clear event
+				$scope.$on(notificationService.getActiveQuestionClearEventType(), function(event) {
 					_setActiveQuestion(null);
-					vm.buzzerEvent = false;
 				});
 			}
 			
@@ -117,13 +137,13 @@
 			
 			function _setActiveContestant(c, notificationEvent) {
 				var contestant;
-				if (c) {
+				if (!notificationEvent) {
+					contestant = c;
+				}
+				else if (c) {
 					contestant = _findContestant(c);
 					console.log('New Active constestant' + contestant.fullName);
 					console.log('buzzer clicked: ' + notificationEvent);
-					if (notificationEvent && vm.activeQuestion) {
-						vm.buzzerEvent = notificationEvent;
-					}
 				}
 				else {
 					contestant = null;
@@ -166,17 +186,21 @@
 				return foundContestant;
 			}
 			
-			function _setActiveQuestion(question) {
+			function _setActiveQuestion(question) {				
+				// if we are making a new question active, make sure its selected
 				if (question) {
 					question.selected = true;
 				}
-				vm.activeQuestion = question;
+				
 				// clear any answered state for contestants
 				if (vm.contestants) {
 					vm.contestants.forEach(function (c) {
-						c.hasAnswered = false;
+						c.answerType = null;
 					});
 				}
+				
+				// set the active question
+				vm.activeQuestion = question;
 			}
 			
 			function _locateCategoryQuestion(selectedQuestion) {
@@ -214,6 +238,51 @@
 			function _clearContestantsWrongAnswers() {
 				vm.contestants.forEach(function(c, index) {
 					c.wrongAnswered = false;
+				});
+			}
+			
+			function _handleHostResponse() {
+				vm.waitingForHost = true;
+				contestantService.withAnswer().then(function (results) {
+					var answer = results.data;
+					console.log('contestantService.withAnswer() is returning....');
+					console.log(answer);
+					var answerType = answer.answerType;
+					switch(answerType) {				
+						case CORRECT_ANSWER_TYPE:
+							var contestant = _findContestant(answer.contestant);
+							contestant.totalScore = answer.contestant.totalScore;
+							contestant.answerType = answer.answerType;
+							// remove the selected flag from the existing active question
+							if (vm.activeQuestion) {
+								vm.activeQuestion.selected = false;
+								vm.activeQuestion.answerType = answerType;
+							}
+							else {
+								console.log('we have an answer, but no question ???');
+								console.log(vm);
+							}
+							break;
+							
+						case INCORRECT_ANSWER_TYPE:
+							var contestant = _findContestant(answer.contestant);
+							contestant.totalScore = answer.contestant.totalScore;
+							contestant.answerType = answer.answerType;
+							break;
+							
+						default:
+							// remove the selected flag from the existing active question
+							if (vm.activeQuestion) {
+								vm.activeQuestion.selected = false;
+								vm.activeQuestion.answerType = answerType;
+							}
+							else {
+								console.log('we have an answer, but no question ???');
+								console.log(vm);
+							}
+					}
+				
+					vm.waitingForHost = false;
 				});
 			}
 			

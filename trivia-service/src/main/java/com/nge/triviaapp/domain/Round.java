@@ -2,8 +2,10 @@ package com.nge.triviaapp.domain;
 
 import java.io.Serializable;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.enterprise.util.AnnotationLiteral;
+import javax.json.JsonObject;
 import javax.json.bind.annotation.JsonbTransient;
 import javax.json.bind.annotation.JsonbVisibility;
 import javax.persistence.CascadeType;
@@ -56,6 +58,14 @@ public class Round implements ActiveDomain, Serializable {
 	
 	public AnnotationLiteral<Active> getLiteral(ActiveActionType type) {
 		return new RoundLiteral(type);
+	}
+	
+	public static Round createFrom(JsonObject jsonData) {
+		Round round = new Round();
+		round.setName(jsonData.getString("roundName"));
+		Set<Category> categories = jsonData.getJsonArray("categories").stream().map(c -> Category.createFrom(c.asJsonObject(), round)).collect(Collectors.toSet());
+		round.setCategories(categories);
+		return round;
 	}
 	
 	class RoundLiteral extends ActiveActionLiteral {

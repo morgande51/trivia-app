@@ -3,6 +3,7 @@ package com.nge.triviaapp.domain;
 import java.io.Serializable;
 
 import javax.enterprise.util.AnnotationLiteral;
+import javax.json.JsonObject;
 import javax.json.bind.annotation.JsonbProperty;
 import javax.json.bind.annotation.JsonbTypeAdapter;
 import javax.persistence.Column;
@@ -72,11 +73,29 @@ public class Question implements ActiveDomain, SecuredProperty, Serializable {
 	}
 	
 	public AnnotationLiteral<Active> getLiteral() {
-		return new QuestionLiteral();
+		return new QuestionLiteral(ActiveActionType.UPDATE);
+	}
+	
+	public AnnotationLiteral<Active> getLiteral(ActiveActionType type) {
+		return new QuestionLiteral(type);
+	}
+	
+	public static Question createFrom(JsonObject jsonObj, Category category) {
+		Question question = new Question();
+		question.setCategory(category);
+		question.setAnswer(jsonObj.getString("answer"));
+		question.setText(jsonObj.getString("question"));
+		question.setValue(jsonObj.getInt("value"));
+		return question;
 	}
 	
 	class QuestionLiteral extends ActiveActionLiteral {
-	
+		
+		
+		public QuestionLiteral(ActiveActionType type) {
+			super(type);
+		}
+
 		@Override
 		public Class<? extends ActiveDomain> value() {
 			return Question.class;

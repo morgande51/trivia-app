@@ -1,12 +1,19 @@
 package com.nge.triviaapp.game;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.Asynchronous;
 import javax.ejb.Lock;
 import javax.ejb.Singleton;
+import javax.ejb.Startup;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.enterprise.event.Event;
@@ -14,11 +21,16 @@ import javax.enterprise.event.Observes;
 import javax.enterprise.event.TransactionPhase;
 import javax.enterprise.util.AnnotationLiteral;
 import javax.inject.Inject;
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
 
 import static com.nge.triviaapp.security.TriviaSecurity.*;
 
 import com.nge.triviaapp.domain.ActiveDomain;
 import com.nge.triviaapp.contestant.BuzzerAcknowledgmentResponse;
+import com.nge.triviaapp.contestant.BuzzerReset;
+import com.nge.triviaapp.contestant.BuzzerResetRequest;
 import com.nge.triviaapp.domain.Active;
 import com.nge.triviaapp.domain.ActiveActionType;
 import com.nge.triviaapp.domain.Category;
@@ -33,6 +45,7 @@ import lombok.Getter;
 import lombok.extern.java.Log;
 
 @Singleton
+@Startup
 @PermitAll
 @Log
 public class GameServiceSessionBean implements GameService {
@@ -54,6 +67,38 @@ public class GameServiceSessionBean implements GameService {
 	
 	@Inject
 	private Event<ActiveDomain> activeEvent;
+	
+//	@PostConstruct
+	public void init() {
+		ClassLoader cl = Thread.currentThread().getContextClassLoader();
+		try (InputStream gotStream = cl.getResourceAsStream("got.json")) {
+			JsonReader usersReader = Json.createReader(gotStream);
+			JsonObject jsonObj = usersReader.readObject();
+			Set<Round> rounds = jsonObj.getJsonArray("rounds")
+					.stream()
+					.map(r -> Round.createFrom(r.asJsonObject()))
+					.collect(Collectors.toSet());
+			rounds.forEach(r -> {
+				Set<Category> categories = new HashSet<>(r.getCategories());
+				r.setCategories(null);
+				dataService.persist(r);
+				dataService.flush();
+				r.setCategories(categories);
+				dataService.flush();
+				categories.forEach(category -> {
+					Set<Question> questions = new HashSet<>(category.getQuestions());
+//					category.setQuestions(null);
+					dataService.persist(category);
+					dataService.flush();
+					category.setQuestions(questions);
+					dataService.flush();
+				});
+			});
+		}
+		catch (IOException e) {
+			
+		}
+	}
 	
 	public List<Category> getActiveRoundCategories() {
 		return dataService.getRoundCategories(activeRound.getId());
@@ -109,6 +154,13 @@ public class GameServiceSessionBean implements GameService {
 		activeQuestion = null;
 	}
 	
+	@RolesAllowed(ADMIN_ROLE)
+	@Lock
+	public void clearActiveQuestion() {
+		activeEvent.select(activeQuestion.getLiteral(ActiveActionType.DELETE)).fire(activeQuestion);
+		activeQuestion = null;
+	}
+	
 	public List<Contestant> getContestants() {
 		return dataService.getContestants();
 	}
@@ -136,8 +188,14 @@ public class GameServiceSessionBean implements GameService {
 	
 	@Lock
 	public void handleActiveBuzzerEvent(@Observes BuzzerAcknowledgmentResponse response ) {
-		log.info("host is going to be made aware that the activeContestant will be: " + response.getContestant());
+		log.info("Game service is being notified that the activeContestant will be: " + response.getContestant());
 		setActiveContestant(response.getContestant());
+	}
+	
+	@Lock
+	public void handleBuzzerClearEvent(@Observes @BuzzerReset(admin=true) BuzzerResetRequest buzzerReset) {
+		log.info("Game service is being notified that the buzzer has reset by the admin.");
+		this.activeContestant = null;		
 	}
 	
 	@Asynchronous

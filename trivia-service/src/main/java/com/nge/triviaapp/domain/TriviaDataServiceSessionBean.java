@@ -16,8 +16,10 @@ public class TriviaDataServiceSessionBean implements TriviaDataService {
 	private static final String FIND_ALL_ROUNDS_QRY = "Rounds.findAll";
 	private static final String ROUND_CATEGORY_QRY = "Category.findByRound";
 	private static final String FIND_ALL_CONTESTANTS_QRY = "Contestant.findAll";
+	private static final String FIND_CONTESTANT_BY_EMAIL_QRY = "Contestant.findByEmail";
 	private static final String ROUND_PARAM = "roundId";
 	private static final String CATEGORY_PARAM = "categoryId";
+	private static final String EMAIL_PARAM = "email";
 	
 	@PersistenceContext
 	private EntityManager em;
@@ -48,6 +50,15 @@ public class TriviaDataServiceSessionBean implements TriviaDataService {
 	@Override
 	public List<Contestant> getContestants() {
 		return em.createNamedQuery(FIND_ALL_CONTESTANTS_QRY, Contestant.class).getResultList();
+	}
+	
+	@Override
+	public Contestant getContestantByEmail(String email) {
+		return em.createNamedQuery(FIND_CONTESTANT_BY_EMAIL_QRY, Contestant.class)
+				.setParameter(EMAIL_PARAM, email.toUpperCase())
+				.getResultStream()
+				.findAny()
+				.orElse(null);
 	}
 	
 	@Override

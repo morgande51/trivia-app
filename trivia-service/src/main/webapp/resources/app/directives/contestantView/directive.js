@@ -15,13 +15,13 @@
 	var PENDING_STATUS = 'PENDING';
 	var INCORRECT_ANSWER_STATUS = 'INCORRECT';
 	
+	var APPLICATION_RESET = 'APPLICATION_RESET';
+	
 	triviaApp.directive('contestantView', [function() {
 		
 		var controller = ['$scope', '$rootScope', 'contestantService', 'gameService', 'notificationService', function ($scope, $rootScope, contestantService, gameService, notificationService) {
 			var vm = this;
-			vm.contestant = $rootScope.authenticatedUser;
-			console.log("contestant is...");
-			console.log(vm.contestant);
+
 			function init() {
 				// get the current status
 				_setHasBuzzedIn(false);
@@ -48,13 +48,37 @@
 				
 				// handle new activeRound
 				$scope.$on(notificationService.getActiveRoundEventType(), function (event, round) {
+					console.log('$scope.$on(ACTIVE_ROUND_EVENT)');
 					_loadActiveRoundCategories();
 					vm.waitingForHost = false;
 				});
 				
 				// handle question selected notification
 				$scope.$on(notificationService.getActiveQuestionEventType(), function(event, question) {
+					console.log('$scope.$on(ACTIVE_QUESTION_EVENT)');
 					_setActiveQuestion(question);
+					vm.waitingForHost = false;
+				});
+				
+				// handle question clear notification
+				$scope.$on(notificationService.getActiveQuestionClearEventType(), function (event) {
+					console.log('$scope.$on(ACTIVE_QUESTION_CLEAR_EVENT)');
+					_setHasBuzzedIn(false);
+					
+					var status;
+					switch (vm.contestantStatus) {
+						case ACTIVE_STATUS:
+						case RECOGNIZED_STATUS:
+							status = ACTIVE_STATUS;
+							break;
+							
+						default:
+							status = null;
+					}
+					_setContestantStatus(status);
+						
+					_setActiveQuestionAnswer(null);
+					_setActiveQuestion(null);
 					vm.waitingForHost = false;
 				});
 				
@@ -74,6 +98,12 @@
 					else {
 						_clearBuzzer(answerPayload.answerType);
 					}
+				});
+				
+				// handle end activeRound
+				$scope.$on(notificationService.getRoundEndEventType(), function (event) {
+					console.log('$scope.$on(ROUND_END_EVENT)');
+					_clearBuzzer();
 				});
 				
 				// handle active notification
@@ -109,6 +139,10 @@
 			}
 			
 			init();
+			$scope.$on(APPLICATION_RESET, function (event) {
+				console.log('we are resetting the application!');
+				init();
+			});
 			
 			function _loadActiveRoundCategories() {
 				gameService.getActiveRoundCategories().then(function (results) {
@@ -118,6 +152,7 @@
 			}
 			
 			function _setContestantStatus(status) {
+				console.log('status being set to: ' + status);
 				vm.contestantStatus = status;
 			}
 			
@@ -216,7 +251,7 @@
 				if (answerType == CORRECT_ANSWER_TYPE && vm.contestantStatus == RECOGNIZED_STATUS) {
 					status == ACTIVE_STATUS;
 				}
-				console.log('our buzzer is clearing...');
+				console.log('our buzzer is clearing..');
 				_setContestantStatus(status);
 				_setHasBuzzedIn(false);
 				_setActiveQuestionAnswer(answerType);

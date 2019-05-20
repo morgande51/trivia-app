@@ -37,7 +37,7 @@ public class PrincipalLocatorServiceSessionBean implements PrincipalLocatorServi
 		
 		T t = null;
 		if (principal != null) {
-			t = em.createNamedQuery("Contestant.findFromEmail", principalType)
+			t = em.createNamedQuery("Contestant.findByEmail", principalType)
 				.setParameter("email", principal.getName().toUpperCase())
 				.getResultStream()
 				.findAny()
