@@ -19,5 +19,9 @@ public abstract class ActiveActionLiteral extends AnnotationLiteral<Active> impl
 		return type;
 	}
 	
+	public void setAction(ActiveActionType type) {
+		this.type = type;
+	}
+	
 	private static final long serialVersionUID = 1L;
 }

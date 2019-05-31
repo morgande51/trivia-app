@@ -7,10 +7,10 @@ import javax.ws.rs.ext.Provider;
 
 import com.nge.triviaapp.contestant.ContestantException.Reason;
 
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 
 @Provider
-@Log
+@Slf4j
 public class ContestantExceptionMapper implements ExceptionMapper<ContestantException> {
 	
 	private static final String DUPLICATE_ERROR_MSG = "Contestant has already buzzed in for the active question";
@@ -19,7 +19,7 @@ public class ContestantExceptionMapper implements ExceptionMapper<ContestantExce
 	public Response toResponse(ContestantException exception) {
 		
 		String msg = getErrorMsg(exception.getReason());
-		log.severe(exception.getContestant() + " " + msg);
+		log.error("{} = {}", exception.getContestant(), msg);
 		return Response.status(Status.BAD_REQUEST).entity(msg).build();
 	}
 	

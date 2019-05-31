@@ -23,6 +23,10 @@
 				vm.buzzerEvent = false;
 				vm.contestantRecognized = false;
 				vm.activeQuestion = null;
+				vm.activeContestant = null;
+				vm.activeCategories = null;
+				vm.activeRound = null;
+				vm.rounds = null;
 				
 				gameService.getContestants().then(function (results) {
 					_setContestants(results.data);
@@ -110,7 +114,7 @@
 					if (selectedQuestion) {
 						promise.then(function() {
 							var question = _locateCategoryQuestion(selectedQuestion);
-							_setActiveQuestion(question, true);
+							_setActiveQuestion(question);
 						});
 					}
 				});
@@ -263,6 +267,9 @@
 				gameService.setSelectedRound(round.id).then(function (results) {
 					_setActiveRound(round);
 					_getActiveRoundCategories();
+				});
+				gameService.getContestants().then(function (results) {
+					_setContestants(results.data);
 				});
 			};
 			

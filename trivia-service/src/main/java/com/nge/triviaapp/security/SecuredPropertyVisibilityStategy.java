@@ -7,9 +7,9 @@ import java.util.stream.Stream;
 import javax.json.bind.config.PropertyVisibilityStrategy;
 import javax.security.enterprise.SecurityContext;
 
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 
-@Log
+@Slf4j
 public class SecuredPropertyVisibilityStategy implements PropertyVisibilityStrategy {
 	
 	private SecurityContext securityContext;
@@ -33,11 +33,11 @@ public class SecuredPropertyVisibilityStategy implements PropertyVisibilityStrat
 	protected boolean isVisible(SecuredByRoles rolesAllowed) {
 		boolean visible = true;
 		if (rolesAllowed != null) {
-			log.fine("this property requres roles...");
+			log.trace("this property requres roles...");
 			visible = (securityContext != null && 
 					   Stream.of(rolesAllowed.value())
 					   		.anyMatch(r -> securityContext.isCallerInRole(r)));
-			log.fine("the visibility for this data will be: " + visible);
+			log.trace("the visibility for this data will be: {}", visible);
 		}
 		return visible;
 	}

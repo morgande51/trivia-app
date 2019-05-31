@@ -23,13 +23,13 @@ import com.nge.triviaapp.domain.Contestant;
 import com.nge.triviaapp.domain.ContestantRole;
 import com.nge.triviaapp.domain.TriviaDataService;
 
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 
 @Singleton
 @Startup
 @TransactionAttribute(TransactionAttributeType.REQUIRED)
 @PermitAll
-@Log
+@Slf4j
 public class UserServiceSessionBean implements UserService {
 	
 	private static final String USERS_LIST_PROPERTY = "com.nge.triviaapp.users";
@@ -50,8 +50,7 @@ public class UserServiceSessionBean implements UserService {
 			addUsers(users);
 		}
 		catch (IOException e) {
-			log.severe("Unable to load users.  Abort!!!!!");
-			log.severe(e.getMessage());
+			log.error("Unable to load users.  Abort!!!!!", e);
 			throw new RuntimeException(e);
 		}		
 	}

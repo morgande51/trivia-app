@@ -12,11 +12,7 @@ public interface ContestantService {
 
 	public BuzzerAcknowledgmentResponse processContestantBuzzard() throws ContestantException;
 
-	public void handleRoundEndEvent(Round round);
+	public void onActiveRoundChange(Round round);
 
-	public void handleRoundUpdateEvent(Round round);
-
-	public void handleActiveQuestionEvent(Question question);
-
-	public void handleActiveClearEvent(Question question);
+	public void onActiveQuestionChange(Question question);
 }

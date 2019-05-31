@@ -6,6 +6,7 @@ import java.util.function.Function;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
+import javax.enterprise.event.TransactionPhase;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -29,13 +30,13 @@ import com.nge.triviaapp.domain.Contestant;
 import com.nge.triviaapp.domain.Question;
 import com.nge.triviaapp.domain.Round;
 
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 
 @Path("/game")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @ApplicationScoped
-@Log
+@Slf4j
 public class GameEndPoint {
 	
 	public static final String BUZZER_REGISTRATION_EVENT = "sse.buzzer.registration";
@@ -89,7 +90,7 @@ public class GameEndPoint {
 		buzzardBroadcaster.broadcast(sse.newEvent(BUZZER_ACTIVE_CONTESTANT_EVENT, contestantConverter.apply(contestant)));
 	}
 	
-	public void handleBuzzerReset(@Observes BuzzerResetRequest request) {
+	public void handleBuzzerReset(@Observes(during=TransactionPhase.AFTER_SUCCESS) BuzzerResetRequest request) {
 		log.info("Sending broadcast notification[" + BUZZER_CLEAR_EVENT + "] with:" + request);
 		buzzardBroadcaster.broadcast(sse.newEvent(BUZZER_CLEAR_EVENT, buzzerRequestConverter.apply(request)));
 	}
@@ -178,7 +179,13 @@ public class GameEndPoint {
 	@POST
 	@Path("/active/round/contestant")
 	public void setActiveContestant(Contestant contestant) {
-		gameService.setActiveContestant(contestant);
+		gameService.makeContestantActive(contestant);
+	}
+	
+	@DELETE
+	@Path("/active/round/contestant")
+	public void clearActiveContestant() {
+		gameService.clearActiveContestant();
 	}
 	
 	@GET

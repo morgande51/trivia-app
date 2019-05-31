@@ -4,26 +4,23 @@ import java.util.List;
 
 import javax.ejb.Local;
 
-import com.nge.triviaapp.contestant.BuzzerAcknowledgmentResponse;
-import com.nge.triviaapp.contestant.BuzzerResetRequest;
 import com.nge.triviaapp.domain.Category;
 import com.nge.triviaapp.domain.Contestant;
 import com.nge.triviaapp.domain.Question;
 import com.nge.triviaapp.domain.Round;
-import com.nge.triviaapp.host.AnswerRequest;
 
 @Local
 public interface GameService {
 
 	public List<Category> getActiveRoundCategories();
 
-	public List<Question> getActiveRoundCategoryQuestions(long categoryId);
+	public List<Question> getActiveRoundCategoryQuestions(Long categoryId);
 
 	public Question makeQuestionActive(QuestionSelectionRequest request) throws GameException;
 
 	public List<Round> getAllRounds();
 	
-	public Round makeRoundActive(long roundId);
+	public Round makeRoundActive(Long roundId);
 
 	public Round getActiveRound();
 
@@ -31,15 +28,11 @@ public interface GameService {
 	
 	public List<Contestant> getContestants();
 	
-	public void setActiveContestant(Contestant contestant);
-
-	public void handleActiveBuzzerEvent(BuzzerAcknowledgmentResponse response);
-
-	public void handleHostAnswerEvent(AnswerRequest request);
+	public void makeContestantActive(Contestant contestant);
 
 	public ActiveGameStateReponse getActiveGameState();
 
 	public void clearActiveQuestion();
 
-	public void handleBuzzerClearEvent(BuzzerResetRequest buzzerReset);
+	public void clearActiveContestant();
 }

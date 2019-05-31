@@ -76,6 +76,12 @@
 	  	<artifactId>transactions</artifactId>
 	  	<scope>provided</scope>
 	  </dependency>
+	  <dependency>
+	  	<groupId>org.slf4j</groupId>
+	  	<artifactId>slf4j-api</artifactId>
+	  	<scope>provided</scope>
+	  	<version>1.7.22</version>
+	  </dependency>
   </dependencies>
   
   <build>

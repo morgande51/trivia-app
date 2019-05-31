@@ -11,30 +11,30 @@ import javax.security.enterprise.identitystore.IdentityStore;
 
 import com.nge.triviaapp.domain.Contestant;
 
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 
 @ApplicationScoped
-@Log
+@Slf4j
 public class TrivaSecurityIdentityStore implements IdentityStore {
 	
 	@Inject
 	private UserService userService;
 
 	public CredentialValidationResult validate(UsernamePasswordCredential credentials) {
-		log.fine("target user: " + credentials.getCaller());
+		log.debug("target user: {}", credentials.getCaller());
 		Contestant contestant =  userService.findFromEmail(credentials.getCaller());
-		log.fine("Found the following user: " + contestant);
+		log.debug("Found the following user: {}", contestant);
 		
 		CredentialValidationResult result;
 		if (contestant != null && contestant.validate(credentials.getPasswordAsString())) {
-			log.fine("found user...adding to security context: " + contestant);
+			log.debug("found user...adding to security context: {}", contestant);
 			result = new CredentialValidationResult(contestant.getEmail());
         }
 		else {
 			result = CredentialValidationResult.INVALID_RESULT;
 		}
 		
-		log.fine("authentication results status: " + result.getStatus());
+		log.debug("authentication results status: {}", result.getStatus());
 		return result;
 	}
 	

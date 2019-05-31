@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
-import javax.enterprise.util.AnnotationLiteral;
 import javax.json.JsonObject;
 import javax.json.JsonString;
 import javax.json.bind.annotation.JsonbTransient;
@@ -39,7 +38,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Setter;
 import lombok.ToString;
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 
 @Entity
 @Table(name="contestant", indexes=@Index(unique=true, columnList="email"))
@@ -51,7 +50,7 @@ import lombok.extern.java.Log;
 @Data
 @EqualsAndHashCode(exclude= {"totalScore", "fullName", "passwordHash", "salt", "scores", "contestantRoles"})
 @ToString(exclude= {"scores", "contestantRoles"})
-@Log
+@Slf4j
 public class Contestant implements Principal, ActiveDomain, Serializable {
 	
 	private static final String SALT_ALG = "SHA1PRNG";
@@ -158,7 +157,7 @@ public class Contestant implements Principal, ActiveDomain, Serializable {
 	}
 	
 	@Override
-	public AnnotationLiteral<Active> getLiteral() {
+	public ActiveActionLiteral getLiteral() {
 		return new ContestantLiternal();
 	}
 	

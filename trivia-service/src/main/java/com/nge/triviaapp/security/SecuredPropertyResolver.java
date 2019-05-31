@@ -10,11 +10,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
 
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 
 @Provider
 @Produces(MediaType.APPLICATION_JSON)
-@Log
+@Slf4j
 public class SecuredPropertyResolver implements ContextResolver<Jsonb> {
 		
 	@Inject
@@ -27,7 +27,7 @@ public class SecuredPropertyResolver implements ContextResolver<Jsonb> {
 	
 	@Override
 	public Jsonb getContext(Class<?> type) {
-		log.fine("we are resolving this type: " + type.getName());
+		log.debug("we are resolving this type: " + type.getName());
 		Jsonb builder = null;
 		
 		if (isSecuredType(type)) {

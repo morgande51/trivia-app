@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.enterprise.util.AnnotationLiteral;
 import javax.json.JsonObject;
 import javax.json.bind.annotation.JsonbTransient;
 import javax.json.bind.annotation.JsonbVisibility;
@@ -52,12 +51,8 @@ public class Round implements ActiveDomain, Serializable {
 		return (D) this;
 	}
 	
-	public AnnotationLiteral<Active> getLiteral() {
-		return new RoundLiteral(ActiveActionType.UPDATE);
-	}
-	
-	public AnnotationLiteral<Active> getLiteral(ActiveActionType type) {
-		return new RoundLiteral(type);
+	public ActiveActionLiteral getLiteral() {
+		return new RoundLiteral();
 	}
 	
 	public static Round createFrom(JsonObject jsonData) {
@@ -69,11 +64,6 @@ public class Round implements ActiveDomain, Serializable {
 	}
 	
 	class RoundLiteral extends ActiveActionLiteral {
-		
-		public RoundLiteral(ActiveActionType type) {
-			super(type);
-			// TODO Auto-generated constructor stub
-		}
 
 		@Override
 		public Class<? extends ActiveDomain> value() {

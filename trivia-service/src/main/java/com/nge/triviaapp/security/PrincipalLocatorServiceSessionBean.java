@@ -15,12 +15,12 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.security.enterprise.SecurityContext;
 
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Session Bean implementation class PrincipalLocatorService
  */
-@Log
+@Slf4j
 @Stateless
 @RolesAllowed({CONTESTANT_ROLE, HOST_ROLE, ADMIN_ROLE})
 public class PrincipalLocatorServiceSessionBean implements PrincipalLocatorService {
@@ -42,7 +42,7 @@ public class PrincipalLocatorServiceSessionBean implements PrincipalLocatorServi
 				.getResultStream()
 				.findAny()
 				.get();
-			log.fine("located principal: " + t);
+			log.debug("located principal: " + t);
 		}
 		return t;
 	}

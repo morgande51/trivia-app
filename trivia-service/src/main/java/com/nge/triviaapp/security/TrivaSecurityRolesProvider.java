@@ -13,10 +13,10 @@ import javax.security.enterprise.identitystore.IdentityStore;
 
 import com.nge.triviaapp.domain.Contestant;
 
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 
 @ApplicationScoped
-@Log
+@Slf4j
 public class TrivaSecurityRolesProvider implements IdentityStore {
 	
 	@Inject
@@ -31,7 +31,7 @@ public class TrivaSecurityRolesProvider implements IdentityStore {
 	public Set<String> getCallerGroups(CredentialValidationResult validationResult) {
 		Principal authenticatedUser = validationResult.getCallerPrincipal();		
 		Contestant user = userServicer.findFromEmail(authenticatedUser.getName());
-		log.fine("getting roles for user: " + user);
+		log.debug("getting roles for user: " + user);
 		return user.getRoles();
 //		return Stream.of(TriviaSecurity.HOST_ROLE, TriviaSecurity.ADMIN_ROLE, TriviaSecurity.CONTESTANT_ROLE).collect(Collectors.toSet());
 	}

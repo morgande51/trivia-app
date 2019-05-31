@@ -23,8 +23,9 @@
 			var vm = this;
 
 			function init() {
+				_cleanup();
+				
 				// get the current status
-				_setHasBuzzedIn(false);
 				gameService.getActiveGame().then(function (response) {
 					var gameState = response.data;
 					if (gameState) {
@@ -44,6 +45,8 @@
 							}
 						}
 					}
+				}, function(error) {
+					console.log('No known active game');
 				});
 				
 				// handle new activeRound
@@ -78,6 +81,7 @@
 					_setContestantStatus(status);
 						
 					_setActiveQuestionAnswer(null);
+					console.log('$scope.$on(ACTIVE_QUESTION_CLEAR_EVENT) is calling _setAcitveQuestion to null');
 					_setActiveQuestion(null);
 					vm.waitingForHost = false;
 				});
@@ -90,12 +94,17 @@
 						var clearWatcher;
 						console.log('...attempting to wait for the host to finish before we perform buzzer clear...');
 						clearWatcher = $scope.$watch('vm.waitingForHost', function(nv, ov) {
-							_clearBuzzer(answerPayload.answerType);
-							clearWatcher();
-							vm.waitingForHost = false;
+							console.log('...waitingForHost value changed from ' + ov + ' to ' + nv);
+							if (!nv) {
+								console.log('...we should now have a value from the host, lets clear the buzzer');
+								_clearBuzzer(answerPayload.answerType);
+								clearWatcher();
+								vm.waitingForHost = false;
+							}
 						});
 					}
 					else {
+						console.log('Is the race condition happening here???');
 						_clearBuzzer(answerPayload.answerType);
 					}
 				});
@@ -103,36 +112,38 @@
 				// handle end activeRound
 				$scope.$on(notificationService.getRoundEndEventType(), function (event) {
 					console.log('$scope.$on(ROUND_END_EVENT)');
-					_clearBuzzer();
+					_cleanup();
 				});
 				
 				// handle active notification
 				$scope.$on(notificationService.getBuzzerActiveEventType(), function(event, activeContestant) {
 					var status;
 					console.log('$scope.$on(BUZZER_ACTIVE_EVENT)');
-					console.log(activeContestant);
+					console.log('active contestant: ' + activeContestant.fullName);
+					console.log('current status: ' + vm.contestantStatus);
 					var listenForAnswer = (vm.contestantStatus == PENDING_STATUS);
-					if (_verifyContestant(activeContestant)) {
-						console.log('current status: ' + vm.contestantStatus);
-						// if there is no active question, the contestant is active and can set the activeQuestion
-						// if there is an active question, the contestant is recognized and can respond to host
-						if (vm.activeQuestion == null) {
-							status = ACTIVE_STATUS;
+					if (!listenForAnswer && vm.contestantStatus != INCORRECT_ANSWER_STATUS) {
+						if (_verifyContestant(activeContestant)) {
+							// if there is no active question, the contestant is active and can set the activeQuestion
+							// if there is an active question, the contestant is recognized and can respond to host
+							if (vm.activeQuestion == null) {
+								status = ACTIVE_STATUS;
+							}
+							else {	
+								status = RECOGNIZED_STATUS;
+							}
+	//						_handleHostResponse();
 						}
-						else {	
-							status = RECOGNIZED_STATUS;
+						else if (vm.activeQuestion) {
+							// there is an active question, but the contestant did not buzz in
+							status = PENDING_STATUS;
 						}
-//						_handleHostResponse();
+						_setContestantStatus(status);
 					}
-					else if (vm.activeQuestion) {
-						// there is an active question, but the contestant did not buzz in
-						status = PENDING_STATUS;
-					}
-					_setContestantStatus(status);
-					
-					// we might need to listen for the answer if we are pending
-					if (listenForAnswer) {
+					else if (listenForAnswer){
+						// we might need to listen for the answer if we are pending
 						console.log('$scope.$on(BUZZER_ACTIVE_EVENT) is calling _handleHostResponse()');
+						_setContestantStatus(RECOGNIZED_STATUS);
 						_handleHostResponse();
 					}
 				});
@@ -157,27 +168,27 @@
 			}
 			
 			function _setActiveQuestion(question) {
+				console.log('the activeQuestion is being set to: ' + question);
 				vm.activeQuestion = question;
 				vm.selectedCategory = null;
 				vm.selectedQuestionValue = null;
 			}
 			
 			function _setActiveQuestionAnswer(answer) {
-				if (vm.activeQuestion) {
-					var selectedCategory = vm.activeQuestion.category.id;
-					var questionId = vm.activeQuestion.id;
-					for (var cId in vm.categories) {
-						var category = vm.categories[cId];
-						if (category.id == selectedCategory) {
-							for (var qId in category.questions) {
-								var question = category.questions[qId];
-								if (question.id == questionId) {
-									question.answerType = answer;
-									break;
-								}
+				console.log('setting the active question answer to: ' + answer);
+				var selectedCategory = vm.activeQuestion.category.id;
+				var questionId = vm.activeQuestion.id;
+				for (var cId in vm.categories) {
+					var category = vm.categories[cId];
+					if (category.id == selectedCategory) {
+						for (var qId in category.questions) {
+							var question = category.questions[qId];
+							if (question.id == questionId) {
+								question.answerType = answer;
+								break;
 							}
-							break;
 						}
+						break;
 					}
 				}
 			}
@@ -199,6 +210,7 @@
 					// if the answering contestant is you
 					if (_verifyContestant(answer.contestant)) {
 						$rootScope.authenticatedUser.totalScore = answer.contestant.totalScore;
+						_setActiveQuestionAnswer(answer.answerType);
 						switch (answer.answerType) {
 							case CORRECT_ANSWER_TYPE:
 								_setContestantStatus(ACTIVE_STATUS);
@@ -209,13 +221,20 @@
 								break;
 								
 							default:
-								console.log('no noting, none has answered');
+								var errorMsg = 'This is an error condition, answer must be correct or inncorect'; 
+								console.log(errorMsg);
+								throw errorMsg;
+								
 						}
 					}
 					else {
 						console.log('contestant buzzed in, but another contestant answered correctly');
 						_setContestantStatus(null);
 					}
+					vm.waitingForHost = false;
+				}, function (error) {
+					console.log('An error occured while getting the host answer');
+					console.log(error);
 					vm.waitingForHost = false;
 				});
 			}
@@ -234,28 +253,26 @@
 			}
 			
 			function _clearBuzzer(answerType) {
-				/*
-				if (vm.contestantStatus == PENDING_STATUS && _verifyContestant(answerPayload.contestant)) {
-					var status
-					if (answerPayload.answerType == CORRECT_ANSWER_TYPE) {
-						status = ACTIVE_STATUS;
-					}
-					else {
-						status = null;
-					}
-					_setContestantStatus(status);
-				}
-				*/
-				// default to clearing the status
-				var status = null;
-				if (answerType == CORRECT_ANSWER_TYPE && vm.contestantStatus == RECOGNIZED_STATUS) {
-					status == ACTIVE_STATUS;
-				}
 				console.log('our buzzer is clearing..');
-				_setContestantStatus(status);
+				if (vm.contestantStatus != ACTIVE_STATUS || answerType == NO_ANSWER_ANSWER_TYPE) {
+					console.log('The current status[' + vm.contestantStatus + '] will be cleared');
+					_setContestantStatus(null);
+				}
 				_setHasBuzzedIn(false);
 				_setActiveQuestionAnswer(answerType);
+				console.log('clearBuzzer() is setting activeQuestion to null');
 				_setActiveQuestion(null);
+			}
+			
+			function _cleanup() {
+				// declar/clear initial state
+				vm.contestantStatus = null;
+				vm.hasBuzzedIn = false;
+				vm.categories = null;
+				vm.selectedCategory = null;
+				vm.selectedQuestionValue = null;
+				vm.waitingForHost = false;
+				vm.activeQuestion = null;
 			}
 			
 			vm.buzzIn = function() {
@@ -285,6 +302,7 @@
 				console.log(questionValue);
 				
 				gameService.makeQuestionActive(categoryId, questionValue).then(function(results) {
+					console.log('updateActiveQuestion is calling _setActiveQuestion');
 					_setActiveQuestion(results.data);
 				}, function (error) {
 					console.log(error);

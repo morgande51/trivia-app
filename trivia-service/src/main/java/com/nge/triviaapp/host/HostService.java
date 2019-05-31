@@ -4,7 +4,6 @@ import java.util.concurrent.Future;
 
 import javax.ejb.Local;
 
-import com.nge.triviaapp.contestant.BuzzerResetRequest;
 import com.nge.triviaapp.domain.Contestant;
 import com.nge.triviaapp.domain.Question;
 import com.nge.triviaapp.domain.Round;
@@ -21,12 +20,4 @@ public interface HostService {
 	public void onActiveContestantChange(Contestant contestant);
 
 	public void onActiveRoundChange(Round round);
-
-	public void onActiveRoundEnd(Round round);
-
-	public void onActiveQuestionClear(Question question);
-
-	public void onBuzzerReset(BuzzerResetRequest buzzerReset);
-
-//	public void onActiveHostAnswer(AnswerRequest request);
 }

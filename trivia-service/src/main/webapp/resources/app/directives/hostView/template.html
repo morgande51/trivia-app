@@ -60,7 +60,7 @@
 							<button class="btn btn-block btn-danger" ng-disabled="!vm.contestantRecognized"  ng-click="vm.sendAnswer('INCORRECT')">Wrong!</button>
 						</div>
 						<div class="col-xs-4">
-							<button class="btn btn-block btn-default" ng-disabled="vm.contestantRecognized" ng-click="vm.sendAnswer('NO_ANSWER')">No Answer</button>
+							<button class="btn btn-block btn-default" ng-disabled="vm.buzzerEvent" ng-click="vm.sendAnswer('NO_ANSWER')">No Answer</button>
 						</div>
 					</div>
 				</div>

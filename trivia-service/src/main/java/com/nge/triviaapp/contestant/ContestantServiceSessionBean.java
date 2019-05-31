@@ -10,15 +10,13 @@ import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.Lock;
 import javax.ejb.Singleton;
-import javax.ejb.Startup;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.enterprise.event.TransactionPhase;
 import javax.inject.Inject;
 
 import com.nge.triviaapp.contestant.ContestantException.Reason;
-import com.nge.triviaapp.domain.Active;
-import com.nge.triviaapp.domain.ActiveActionType;
+import com.nge.triviaapp.domain.ActiveDomainManager;
 import com.nge.triviaapp.domain.Contestant;
 import com.nge.triviaapp.domain.Question;
 import com.nge.triviaapp.domain.QuestionAnswerType;
@@ -27,15 +25,12 @@ import com.nge.triviaapp.host.AnswerRequest;
 import com.nge.triviaapp.security.PrincipalLocatorService;
 import com.nge.triviaapp.security.TriviaSecurity;
 
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 
 @Singleton
-@Startup
 @PermitAll
-@Log
+@Slf4j
 public class ContestantServiceSessionBean implements ContestantService {
-	
-	private boolean activeQuestionExist;
 	
 	private boolean firstContestant;
 	
@@ -52,12 +47,14 @@ public class ContestantServiceSessionBean implements ContestantService {
 	@Inject
 	private PrincipalLocatorService principalLocatorService;
 	
+	@Inject
+	private ActiveDomainManager domainManager;
+	
 	@PostConstruct
 	public void init() {
 		log.info("########################...very key, the Buzzer is being init...########################");
 		buzzedContestants = new LinkedList<>();
 		previousContestants = new HashSet<>();
-		activeQuestionExist = false;
 		firstContestant = true;
 	}
 	
@@ -72,12 +69,12 @@ public class ContestantServiceSessionBean implements ContestantService {
 		if (previousContestants.contains(contestant)) {
 			throw new ContestantException(contestant, Reason.DUPLICATE);
 		}
-		else if (!activeQuestionExist) {
+		else if (!doesActiveQuestionExist()) {
 			throw new ContestantException(contestant, Reason.NO_ACTIVE_QUESTION);
 		}
 		
 		// officially recognize the contestant buzz
-		log.fine("Constant[" + contestant.getEmail() + "] buzz is recognized.");
+		log.debug("Constant[" + contestant.getEmail() + "] buzz is recognized.");
 		buzzedContestants.add(contestant);
 		
 		// notify host contestant is the first to buzz in
@@ -110,27 +107,14 @@ public class ContestantServiceSessionBean implements ContestantService {
 		}
 	}
 	
-	@Lock
-	public void handleRoundEndEvent(@Observes @Active(value=Round.class, action=ActiveActionType.DELETE) Round round) {
-		log.info("Contestant Serivce is handling the end round event");
+	public void onActiveRoundChange(@Observes Round round) {
+		log.info("Contestant Service is handling the Active Round update/delete");
 		cleanup();
 	}
 	
 	@Lock
-	public void handleRoundUpdateEvent(@Observes @Active(Round.class) Round round) {
-		log.info("Contestant Serivce is handling the round update event");
-		cleanup();
-	}
-	
-	@Lock
-	public void handleActiveQuestionEvent(@Observes @Active(Question.class) Question question) {
-		log.info("Contestant Serivce is handling Question Selected event");
-		activeQuestionExist = true;
-	}
-	
-	@Lock
-	public void handleActiveClearEvent(@Observes @Active(value=Question.class, action=ActiveActionType.DELETE) Question question) {
-		log.info("Contestant Serivce is handling Question Clear event");
+	public void onActiveQuestionChange(@Observes Question question) {
+		log.info("Contestant Serivce is handling the Active Question update/delete");
 		cleanup();
 	}
 	
@@ -154,11 +138,15 @@ public class ContestantServiceSessionBean implements ContestantService {
 		BuzzerAcknowledgmentResponse response = new BuzzerAcknowledgmentResponse(contestant);
 		log.info("Recognized contestant[" + contestant.getEmail() + "]");
 		previousContestants.add(contestant);
+		domainManager.setActiveResource(contestant);
 		activeBuzzerEvent.fire(response);
 		return response;
 	}
 	
 	protected void resetBuzzer(BuzzerResetRequest request) {
+		if (request.isAdminReset()) {
+			domainManager.clearActiveResource(Contestant.class);
+		}
 		buzzerResetEvent.select(request.getLiteral()).fire(request);
 		cleanup();
 	}
@@ -166,7 +154,10 @@ public class ContestantServiceSessionBean implements ContestantService {
 	protected final void cleanup() {
 		buzzedContestants.clear();
 		previousContestants.clear();
-		activeQuestionExist = false;
 		firstContestant = true;
+	}
+	
+	protected boolean doesActiveQuestionExist() {
+		return (domainManager.getActiveQuestion() != null);
 	}
 }
