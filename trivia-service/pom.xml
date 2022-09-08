@@ -11,7 +11,7 @@
   
   <properties>
   	<version.thorntail>2.4.0.Final</version.thorntail>
-  	<version.postgresql>42.2.5</version.postgresql>
+  	<version.postgresql>42.4.1</version.postgresql>
   	<failOnMissingWebXml>false</failOnMissingWebXml>
   	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
